@@ -1,0 +1,334 @@
+﻿<Window x:Class="Computer_Status_Viewer.WidgetWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="False" ShowInTaskbar="False"
+        SizeToContent="Height">
+    <Border x:Name="MainBorder" CornerRadius="15" Margin="10">
+        <Border.Background>
+            <LinearGradientBrush x:Name="BorderBackground" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop x:Name="GradientStop1" Color="#FF1A1F2A" Offset="0"/>
+                <GradientStop x:Name="GradientStop2" Color="#FF2D3447" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5" Color="#FF000000"/>
+        </Border.Effect>
+        <StackPanel Margin="15">
+            <Grid Margin="0,0,0,10">
+                <Border Background="#FF3E445B" CornerRadius="8" Padding="5" x:Name="TitleBorder">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.9" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <TextBlock x:Name="TitleLabel" 
+                              Foreground="#FFD4D7E0" 
+                              FontFamily="Segoe UI" 
+                              FontSize="16" 
+                              FontWeight="Bold" 
+                              HorizontalAlignment="Center"
+                              TextAlignment="Center">
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="3" ShadowDepth="0" Color="#FF000000" Opacity="0.3"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                </Border>
+                <Button x:Name="ThemeToggleButton" 
+                        Width="28" Height="28" 
+                        HorizontalAlignment="Right" 
+                        Background="Transparent" 
+                        BorderThickness="0" 
+                        Click="ThemeToggleButton_Click"
+                        Margin="0,0,5,0">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="14">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="0.8"/>
+                                                <Setter Property="RenderTransform">
+                                                    <Setter.Value>
+                                                        <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Opacity" Value="0.6"/>
+                                                <Setter Property="RenderTransform">
+                                                    <Setter.Value>
+                                                        <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                        </Style>
+                    </Button.Style>
+                    <Image x:Name="ThemeIcon" Stretch="Uniform" Width="20" Height="20"/>
+                </Button>
+            </Grid>
+
+            <StackPanel x:Name="System1Content" Visibility="Collapsed">
+                <!-- CPU -->
+                <Border x:Name="CpuBorder" Background="#20FFFFFF" CornerRadius="8" Padding="6" Margin="0,0,0,6">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.85" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <StackPanel>
+                        <TextBlock x:Name="CpuLabel" Foreground="#FF87CEEB" FontFamily="Segoe UI" FontSize="12"/>
+                        <Canvas x:Name="CpuBarCanvas" Height="10" Margin="0,4,0,4">
+                            <Rectangle x:Name="CpuBarBackground" Height="10" Fill="#FF404552" RadiusX="5" RadiusY="5"/>
+                            <Rectangle x:Name="CpuBarFill" Height="10" RadiusX="5" RadiusY="5">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FF4CAF50" Offset="0"/>
+                                        <GradientStop Color="#FF81C784" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Canvas>
+                        <TextBlock x:Name="CpuSpeedLabel" Foreground="#FFB0C4DE" FontFamily="Segoe UI" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Memory -->
+                <Border x:Name="MemoryBorder" Background="#20FFFFFF" CornerRadius="8" Padding="6" Margin="0,0,0,6">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.85" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <StackPanel>
+                        <TextBlock x:Name="MemoryLabel" Foreground="#FF87CEEB" FontFamily="Segoe UI" FontSize="12"/>
+                        <Canvas x:Name="MemoryBarCanvas" Height="10" Margin="0,4,0,4">
+                            <Rectangle x:Name="MemoryBarBackground" Height="10" Fill="#FF404552" RadiusX="5" RadiusY="5"/>
+                            <Rectangle x:Name="MemoryBarFill" Height="10" RadiusX="5" RadiusY="5">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FF2196F3" Offset="0"/>
+                                        <GradientStop Color="#FF64B5F6" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Canvas>
+                        <TextBlock x:Name="MemoryUsageLabel" Foreground="#FFB0C4DE" FontFamily="Segoe UI" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Disk -->
+                <Border x:Name="DiskContainer" Background="#20FFFFFF" CornerRadius="8" Padding="6" Margin="0,0,0,6" Visibility="Collapsed">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.85" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <StackPanel>
+                        <TextBlock x:Name="DiskLabel" Foreground="#FF87CEEB" FontFamily="Segoe UI" FontSize="12"/>
+                        <Canvas x:Name="DiskBarCanvas" Height="10" Margin="0,4,0,4">
+                            <Rectangle x:Name="DiskBarBackground" Height="10" Fill="#FF404552" RadiusX="5" RadiusY="5"/>
+                            <Rectangle x:Name="DiskBarFill" Height="10" RadiusX="5" RadiusY="5">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FFFF9800" Offset="0"/>
+                                        <GradientStop Color="#FFFFB300" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Canvas>
+                        <TextBlock x:Name="DiskSpaceLabel" Foreground="#FFB0C4DE" FontFamily="Segoe UI" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- GPU -->
+                <Border x:Name="GpuContainer" Background="#20FFFFFF" CornerRadius="8" Padding="6" Margin="0,0,0,6" Visibility="Collapsed">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.85" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <StackPanel>
+                        <TextBlock x:Name="GpuLabel" Foreground="#FF87CEEB" FontFamily="Segoe UI" FontSize="12"/>
+                        <Canvas x:Name="GpuBarCanvas" Height="10" Margin="0,4,0,4">
+                            <Rectangle x:Name="GpuBarBackground" Height="10" Fill="#FF404552" RadiusX="5" RadiusY="5"/>
+                            <Rectangle x:Name="GpuBarFill" Height="10" RadiusX="5" RadiusY="5">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FFE91E63" Offset="0"/>
+                                        <GradientStop Color="#FFF06292" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Canvas>
+                        <TextBlock x:Name="GpuTempLabel" Foreground="#FFB0C4DE" FontFamily="Segoe UI" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Processes and Threads -->
+                <Border x:Name="ProcessesContainer" Background="#20FFFFFF" CornerRadius="8" Padding="6" Margin="0,0,0,6" Visibility="Collapsed">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.85" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <Grid>
+                        <TextBlock x:Name="ProcessesLabel" Foreground="#FFB0C4DE" FontFamily="Segoe UI" FontSize="12"/>
+                        <TextBlock x:Name="StreamsLabel" Foreground="#FFB0C4DE" FontFamily="Segoe UI" FontSize="12" HorizontalAlignment="Right"/>
+                    </Grid>
+                </Border>
+
+                <!-- Uptime -->
+                <Border x:Name="UptimeBorder" Background="#20FFFFFF" CornerRadius="8" Padding="6" Margin="0,0,0,0">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.85" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <Grid>
+                        <TextBlock x:Name="UptimeLabel" Foreground="#FF87CEEB" FontFamily="Segoe UI" FontSize="12"/>
+                        <TextBlock x:Name="UptimeValueLabel" Foreground="#FFB0C4DE" FontFamily="Segoe UI" FontSize="12" HorizontalAlignment="Right"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <!-- Recycle Bin -->
+            <Border x:Name="RecycleBinContainer" Background="#20FFFFFF" CornerRadius="8" Padding="10" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock x:Name="InfoLabel" 
+                              Foreground="#FFD4D7E0" 
+                              FontFamily="Segoe UI" 
+                              FontSize="12" 
+                              TextWrapping="Wrap"
+                              HorizontalAlignment="Center"/>
+                    <Button x:Name="RecycleBinButton" 
+                           Width="80" Height="80" 
+                           Background="Transparent" 
+                           BorderThickness="0" 
+                           Click="RecycleBinButton_Click"
+                           Margin="0,10,0,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value="0.8"/>
+                                                    <Setter Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter Property="Opacity" Value="0.6"/>
+                                                    <Setter Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                            </Style>
+                        </Button.Style>
+                        <Image Stretch="Uniform"/>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</Window>

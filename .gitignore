@@ -1,0 +1,91 @@
+# Build artifacts
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+*.log
+*.tlog
+*.obj
+*.pdb
+*.idb
+*.ilk
+*.pch
+*.rsp
+*.sbr
+*.tlh
+*.tli
+*.tmp
+*.tmp_proj
+*.cache
+*.exe
+*.dll
+*.exe.config
+*.dll.config
+*.appx
+*.appxrecipe
+*.msi
+*.msm
+*.msp
+*.nupkg
+*.snupkg
+
+# Packages (NuGet)
+packages/
+# Except build/restore props/targets if any are committed
+!packages/*/build/
+!packages/*/build/*
+!packages/*/buildTransitive/
+!packages/*/buildTransitive/*
+
+# VS/JetBrains/IDE
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.sln.iml
+*.sln.ide
+*.DotSettings.user
+_ReSharper*/
+*_ReSharper.Caches/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Tt]est[Rr]esults*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Publish outputs
+publish/
+*.pubxml
+*.pubxml.user
+
+# Cache/Temps
+$tf/
+.ionide/
+.nuget/
+*.psess
+*.vsp
+*.vsps
+*.psess
+*.vspx
+*.sap
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# WPF specific
+*.g.i.cs
+*.baml
+*.g.cs
+*.csproj.user
+*.dbmdl
+
+# Other
+*.orig
+*.rej
+*.patch

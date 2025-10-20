@@ -1,0 +1,105 @@
+﻿<Window x:Class="Computer_Status_Viewer.SplashScreen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SystemGuard X" 
+        Height="300" 
+        Width="600"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        Topmost="True">
+
+    <Window.Resources>
+        <CubicEase x:Key="EaseInOut" EasingMode="EaseInOut"/>
+
+        <!-- Анимация цвета для логотипа -->
+        <Storyboard x:Key="ColorAnimationStoryboard" RepeatBehavior="Forever">
+            <ColorAnimation Storyboard.TargetName="InnerColor"
+                            Storyboard.TargetProperty="Color"
+                            From="#4682B4" To="#5F9EA0"
+                            Duration="0:0:2"
+                            AutoReverse="True"
+                            EasingFunction="{StaticResource EaseInOut}"/>
+
+            <ColorAnimation Storyboard.TargetName="OuterColor"
+                            Storyboard.TargetProperty="Color"
+                            From="#87CEEB" To="#ADD8E6"
+                            Duration="0:0:2"
+                            AutoReverse="True"
+                            EasingFunction="{StaticResource EaseInOut}"/>
+
+            <!-- Анимация для градиента ProgressBar -->
+            <ColorAnimation Storyboard.TargetName="ProgressStartColor"
+                            Storyboard.TargetProperty="Color"
+                            From="#0078D4" To="#5F9EA0"
+                            Duration="0:0:2"
+                            AutoReverse="True"
+                            EasingFunction="{StaticResource EaseInOut}"/>
+
+            <ColorAnimation Storyboard.TargetName="ProgressEndColor"
+                            Storyboard.TargetProperty="Color"
+                            From="#00C6FF" To="#ADD8E6"
+                            Duration="0:0:2"
+                            AutoReverse="True"
+                            EasingFunction="{StaticResource EaseInOut}"/>
+        </Storyboard>
+    </Window.Resources>
+
+    <Border CornerRadius="25" Margin="20">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#F8F9FA" Offset="0"/>
+                <GradientStop Color="#E9ECEF" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="35" ShadowDepth="5" Opacity="0.35" Color="#444444"/>
+        </Border.Effect>
+
+        <Grid Margin="25">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Круглый логотип -->
+            <Ellipse Grid.Column="0" Grid.Row="0" Width="90" Height="90" VerticalAlignment="Center" Margin="0,0,15,0">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop x:Name="InnerColor" Color="#4682B4" Offset="0"/>
+                        <GradientStop x:Name="OuterColor" Color="#87CEEB" Offset="1"/>
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+
+            <!-- Текст и прогресс-бар -->
+            <StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Margin="10,0,0,0">
+                <TextBlock Text="SystemGuard X" FontSize="28" FontWeight="Bold" FontFamily="Segoe UI" Foreground="#212529" Margin="0,0,0,8"/>
+                <TextBlock Text="Просмотр состояния компьютера" FontSize="16" FontFamily="Segoe UI" Foreground="#6B7280"/>
+
+                <Border Background="#FFFFFF" CornerRadius="15" Height="35" Width="390" Margin="0,15,0,0">
+                    <ProgressBar x:Name="ProgressBar" Height="30" Margin="2" Minimum="0" Maximum="100" Value="0" BorderThickness="0" Background="Transparent" IsIndeterminate="True">
+                        <ProgressBar.Foreground>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop x:Name="ProgressStartColor" Color="#0078D4" Offset="0.0"/>
+                                <GradientStop x:Name="ProgressEndColor" Color="#00C6FF" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </ProgressBar.Foreground>
+                    </ProgressBar>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource ColorAnimationStoryboard}"/>
+        </EventTrigger>
+    </Window.Triggers>
+</Window>
