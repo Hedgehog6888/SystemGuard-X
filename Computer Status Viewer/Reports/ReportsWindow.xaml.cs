@@ -265,42 +265,40 @@ namespace Computer_Status_Viewer.Reports
         }
 
         /// <summary>
-        /// Создание системного отчёта
+        /// Создание быстрого отчёта
         /// </summary>
-        private void CreateSystemReportButton_Click(object sender, RoutedEventArgs e)
+        private void CreateQuickReportButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                StatusText.Text = "Создание системного отчёта...";
-                int reportId = _reportManager.CreateSystemReport();
-                StatusText.Text = $"Системный отчёт создан! ID: {reportId}";
+                StatusText.Text = "Создание быстрого отчёта...";
+                int reportId = _reportManager.CreateQuickReport();
+                StatusText.Text = $"Быстрый отчёт создан! ID: {reportId}";
                 LoadReports();
-                // Отчёт создан успешно
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Ошибка создания системного отчёта: {ex.Message}";
-                MessageBox.Show($"Ошибка создания системного отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusText.Text = $"Ошибка создания быстрого отчёта: {ex.Message}";
+                MessageBox.Show($"Ошибка создания быстрого отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         /// <summary>
-        /// Создание отчёта о производительности
+        /// Создание подробного отчёта
         /// </summary>
-        private void CreatePerformanceReportButton_Click(object sender, RoutedEventArgs e)
+        private void CreateDetailedReportButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                StatusText.Text = "Создание отчёта о производительности...";
-                int reportId = _reportManager.CreatePerformanceReport();
-                StatusText.Text = $"Отчёт о производительности создан! ID: {reportId}";
+                StatusText.Text = "Создание подробного отчёта...";
+                int reportId = _reportManager.CreateDetailedReport();
+                StatusText.Text = $"Подробный отчёт создан! ID: {reportId}";
                 LoadReports();
-                // Отчёт создан успешно
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Ошибка создания отчёта о производительности: {ex.Message}";
-                MessageBox.Show($"Ошибка создания отчёта о производительности: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusText.Text = $"Ошибка создания подробного отчёта: {ex.Message}";
+                MessageBox.Show($"Ошибка создания подробного отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -311,27 +309,33 @@ namespace Computer_Status_Viewer.Reports
         {
             try
             {
-                StatusText.Text = "Создание пользовательского отчёта...";
+                StatusText.Text = "Открытие диалога выбора критериев...";
                 
-                var customData = new Dictionary<string, string>
+                // Открываем диалог выбора критериев для пользовательского отчёта
+                var criteriaDialog = new CustomReportCriteriaDialog();
+                var result = criteriaDialog.ShowDialog();
+                
+                if (result == true)
                 {
-                    { "Пользователь", System.Environment.UserName },
-                    { "Компьютер", System.Environment.MachineName },
-                    { "Время создания", DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") },
-                    { "Заметки", "Пользовательский отчёт создан вручную через интерфейс" },
-                    { "Версия ОС", System.Environment.OSVersion.ToString() },
-                    { "Архитектура", System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE") }
-                };
-
-                int reportId = _reportManager.CreateCustomReport(
-                    "Пользовательский отчёт", 
-                    "Отчёт создан пользователем через интерфейс", 
-                    customData
-                );
-                
-                StatusText.Text = $"Пользовательский отчёт создан! ID: {reportId}";
-                LoadReports();
-                // Отчёт создан успешно
+                    StatusText.Text = "Создание пользовательского отчёта...";
+                    
+                    var selectedCriteria = criteriaDialog.SelectedCriteria;
+                    var reportTitle = criteriaDialog.ReportTitle;
+                    var reportDescription = criteriaDialog.ReportDescription;
+                    
+                    int reportId = _reportManager.CreateCustomReportWithCriteria(
+                        reportTitle, 
+                        reportDescription, 
+                        selectedCriteria
+                    );
+                    
+                    StatusText.Text = $"Пользовательский отчёт создан! ID: {reportId}";
+                    LoadReports();
+                }
+                else
+                {
+                    StatusText.Text = "Создание отчёта отменено";
+                }
             }
             catch (Exception ex)
             {

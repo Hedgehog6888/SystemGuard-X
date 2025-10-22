@@ -181,6 +181,9 @@
     <Compile Include="Reports\ReportsWindow.xaml.cs">
       <DependentUpon>ReportsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Reports\CustomReportCriteriaDialog.xaml.cs">
+      <DependentUpon>CustomReportCriteriaDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Efficiency\ChartHelper.cs" />
     <Compile Include="Efficiency\CpuTabManager.cs" />
     <Compile Include="Efficiency\DiskTabManager.cs" />
@@ -224,6 +227,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Reports\ReportsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Reports\CustomReportCriteriaDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

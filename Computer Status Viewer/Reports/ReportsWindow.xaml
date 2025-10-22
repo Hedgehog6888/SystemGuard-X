@@ -10,9 +10,10 @@
     
     <Window.Resources>
         <Style x:Key="WidgetButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="180"/>
+            <Setter Property="MinWidth" Value="120"/>
             <Setter Property="Height" Value="36"/>
             <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Padding" Value="15,8"/>
             <Setter Property="Background">
                 <Setter.Value>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -200,7 +201,7 @@
         </Grid.RowDefinitions>
 
         <!-- Заголовок и кнопки управления -->
-        <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="20,15">
+        <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="20,8">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -210,22 +211,28 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                 </StackPanel>
                 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button x:Name="CreateSystemReportButton" 
-                            Content="Создать системный отчёт" 
-                            Style="{StaticResource WidgetButtonStyle}"
-                            Click="CreateSystemReportButton_Click"
-                            Margin="0,0,10,0"/>
-                    <Button x:Name="CreatePerformanceReportButton" 
-                            Content="Создать отчёт о производительности" 
-                            Style="{StaticResource WidgetButtonStyle}"
-                            Click="CreatePerformanceReportButton_Click"
-                            Margin="0,0,10,0"/>
-                    <Button x:Name="CreateCustomReportButton" 
-                            Content="Создать пользовательский отчёт" 
-                            Style="{StaticResource WidgetButtonStyle}"
-                            Click="CreateCustomReportButton_Click"/>
-                </StackPanel>
+                <!-- Панель с кнопками - узкая, слева -->
+                <Border Grid.Column="0" 
+                        Background="Transparent" 
+                        MaxWidth="600"
+                        HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Button x:Name="CreateQuickReportButton" 
+                                Content="Быстрый отчёт" 
+                                Style="{StaticResource WidgetButtonStyle}"
+                                Click="CreateQuickReportButton_Click"
+                                Margin="0,0,8,0"/>
+                        <Button x:Name="CreateDetailedReportButton" 
+                                Content="Подробный отчёт" 
+                                Style="{StaticResource WidgetButtonStyle}"
+                                Click="CreateDetailedReportButton_Click"
+                                Margin="0,0,8,0"/>
+                        <Button x:Name="CreateCustomReportButton" 
+                                Content="Пользовательский отчёт" 
+                                Style="{StaticResource WidgetButtonStyle}"
+                                Click="CreateCustomReportButton_Click"/>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
 
