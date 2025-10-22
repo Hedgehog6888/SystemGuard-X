@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Computer_Status_Viewer.Properties;
+using Computer_Status_Viewer.Reports;
 using WinForms = System.Windows.Forms;
 using WPF = System.Windows;
 
@@ -35,6 +36,7 @@ namespace Computer_Status_Viewer
         private Lazy<OSManager> _osManager;
         private Lazy<WorkTimeManager> _workTimeManager;
         private Lazy<RegionalSettingsManager> _regionalSettingsManager;
+        private Lazy<ReportManager> _reportManager;
         private WidgetManager _widgetManager;
         private DispatcherTimer timer;
         private DateTime lastUpdateTime;
@@ -67,6 +69,7 @@ namespace Computer_Status_Viewer
             _osManager = new Lazy<OSManager>(() => new OSManager(Resources));
             _workTimeManager = new Lazy<WorkTimeManager>(() => new WorkTimeManager(Resources));
             _regionalSettingsManager = new Lazy<RegionalSettingsManager>(() => new RegionalSettingsManager(Resources));
+            _reportManager = new Lazy<ReportManager>(() => new ReportManager());
             _subcategoryManager = new Lazy<SubcategoryManager>(() => new SubcategoryManager(MainContentArea, PerformanceTabControl, _performanceManager.Value, _summaryManager.Value, CategoryTreeView));
             _navigationManager = new Lazy<NavigationManager>(() => new NavigationManager(
                 CategoryTreeView,
@@ -135,6 +138,109 @@ namespace Computer_Status_Viewer
             }
         }
 
+        /// <summary>
+        /// Создание автоматического отчёта о системе
+        /// </summary>
+        public void CreateSystemReport()
+        {
+            try
+            {
+                int reportId = _reportManager.Value.CreateSystemReport();
+                MessageBox.Show($"Отчёт о системе создан успешно! ID: {reportId}", "Отчёт создан", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка создания отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Создание отчёта о производительности
+        /// </summary>
+        public void CreatePerformanceReport()
+        {
+            try
+            {
+                int reportId = _reportManager.Value.CreatePerformanceReport();
+                MessageBox.Show($"Отчёт о производительности создан успешно! ID: {reportId}", "Отчёт создан", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка создания отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Создание пользовательского отчёта
+        /// </summary>
+        public void CreateCustomReport()
+        {
+            try
+            {
+                var customData = new Dictionary<string, string>
+                {
+                    { "Пользователь", System.Environment.UserName },
+                    { "Компьютер", System.Environment.MachineName },
+                    { "Время создания", DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") },
+                    { "Заметки", "Пользовательский отчёт создан вручную" }
+                };
+
+                int reportId = _reportManager.Value.CreateCustomReport(
+                    "Пользовательский отчёт", 
+                    "Отчёт создан пользователем", 
+                    customData
+                );
+                MessageBox.Show($"Пользовательский отчёт создан успешно! ID: {reportId}", "Отчёт создан", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка создания отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Демонстрация работы с отчётами
+        /// </summary>
+        public void DemonstrateReports()
+        {
+            try
+            {
+                // Создаём системный отчёт
+                CreateSystemReport();
+                
+                // Создаём отчёт о производительности
+                CreatePerformanceReport();
+                
+                // Создаём пользовательский отчёт
+                CreateCustomReport();
+                
+                // Получаем все отчёты
+                var allReports = _reportManager.Value.GetAllReports();
+                MessageBox.Show($"Всего отчётов в базе данных: {allReports.Count}", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка демонстрации отчётов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Обработчик кнопки "Отчёты"
+        /// </summary>
+        private void ReportsButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var reportsWindow = new Reports.ReportsWindow();
+                reportsWindow.Owner = this;
+                reportsWindow.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка открытия окна отчётов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         public async Task LoadContentAsync()
         {
             try
@@ -147,6 +253,13 @@ namespace Computer_Status_Viewer
                         ((TreeViewItem)CategoryTreeView.Items[0]).IsSelected = true;
                     }, DispatcherPriority.Background);
                 }
+
+                // Пример создания автоматического отчёта при запуске (можно убрать в продакшене)
+                // Раскомментируйте следующую строку для демонстрации работы с отчётами
+                // DemonstrateReports();
+                
+                // Для тестирования можно раскомментировать следующую строку:
+                // ReportsButton_Click(null, null);
             }
             catch (Exception ex)
             {

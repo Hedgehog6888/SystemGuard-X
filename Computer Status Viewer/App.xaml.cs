@@ -77,7 +77,7 @@ namespace Computer_Status_Viewer
                 Log("Иконка в трее инициализирована");
 
                 pipeCts = new CancellationTokenSource();
-                Task.Run(() => ListenForShowWindowMessage(pipeCts.Token));
+                var pipeTask = Task.Run(() => ListenForShowWindowMessage(pipeCts.Token));
                 Log("Запущена задача обработки сообщений через пайп");
 
                 mainWindow = new MainWindow(widgetManager);
