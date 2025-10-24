@@ -236,98 +236,387 @@
             </Grid>
         </Border>
 
-        <!-- Основное содержимое -->
-        <Grid Grid.Row="1" Margin="20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="3*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Список отчётов -->
-            <Border Grid.Column="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4">
+        <!-- Основное содержимое с вкладками -->
+        <TabControl Grid.Row="1" Margin="20" x:Name="MainTabControl">
+            <!-- Вкладка "Все отчёты" -->
+            <TabItem Header="📊 Все отчёты">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
-                        <TextBlock Text="Список отчётов" FontSize="16" FontWeight="Bold"/>
-                    </Border>
-                    
-                    <ListBox x:Name="ReportsListBox" 
-                             Grid.Row="1" 
-                             ItemContainerStyle="{StaticResource ReportItemStyle}"
-                             SelectionChanged="ReportsListBox_SelectionChanged">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14" Margin="0,0,0,5"/>
-                                    <TextBlock Text="{Binding Description}" FontSize="12" Foreground="#666" Margin="0,0,0,5"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding ReportType.Name}" FontSize="11" Foreground="#4682B4" Margin="0,0,10,0"/>
-                                        <TextBlock Text="{Binding CreatedDate, StringFormat='dd.MM.yyyy HH:mm'}" FontSize="11" Foreground="#999"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Список отчётов с фильтрами -->
+                    <Border Grid.Column="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Заголовок с поиском -->
+                            <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Список отчётов" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <TextBox x:Name="SearchTextBox" 
+                                                 Width="200" 
+                                                 Height="30" 
+                                                 Padding="8,5"
+                                                 VerticalAlignment="Center"
+                                                 TextChanged="SearchTextBox_TextChanged"
+                                                 Margin="0,0,10,0">
+                                            <TextBox.Style>
+                                                <Style TargetType="TextBox">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="TextBox">
+                                                                <Border Background="White" 
+                                                                        BorderBrush="#CBD5E0" 
+                                                                        BorderThickness="1" 
+                                                                        CornerRadius="4">
+                                                                    <ScrollViewer x:Name="PART_ContentHost" Margin="8,5"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </TextBox.Style>
+                                        </TextBox>
+                                        <Button x:Name="RefreshButton" 
+                                                Content="🔄" 
+                                                Width="30" Height="30"
+                                                Click="RefreshButton_Click"
+                                                ToolTip="Обновить список"/>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                        <TextBlock Text="Статус: " FontSize="11" Foreground="#666"/>
-                                        <TextBlock Text="{Binding Status}" FontSize="11" Foreground="#4682B4" FontWeight="Medium"/>
-                                        <TextBlock Text=" | " FontSize="11" Foreground="#999" Margin="5,0"/>
-                                        <TextBlock Text="{Binding IsAutomatic, StringFormat='{}{0:Автоматический;Пользовательский}'}" FontSize="11" Foreground="#999"/>
-                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            
+                            <!-- Фильтры -->
+                            <Border Grid.Row="1" Background="#FAFAFA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="10,8">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Фильтры:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <ComboBox x:Name="StatusFilterComboBox" 
+                                              Width="120" 
+                                              Margin="0,0,5,0"
+                                              SelectionChanged="FilterComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Все статусы" IsSelected="True"/>
+                                        <ComboBoxItem Content="Создан"/>
+                                        <ComboBoxItem Content="В процессе"/>
+                                        <ComboBoxItem Content="Завершён"/>
+                                        <ComboBoxItem Content="Ошибка"/>
+                                    </ComboBox>
+                                    <ComboBox x:Name="TypeFilterComboBox" 
+                                              Width="140" 
+                                              Margin="0,0,5,0"
+                                              SelectionChanged="FilterComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Все типы" IsSelected="True"/>
+                                        <ComboBoxItem Content="Автоматические"/>
+                                        <ComboBoxItem Content="Пользовательские"/>
+                                    </ComboBox>
+                                    <ComboBox x:Name="CategoryFilterComboBox" 
+                                              Width="150"
+                                              SelectionChanged="FilterComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Все категории" IsSelected="True"/>
+                                        <ComboBoxItem Content="Системная информация"/>
+                                        <ComboBoxItem Content="Производительность"/>
+                                        <ComboBoxItem Content="Безопасность"/>
+                                        <ComboBoxItem Content="Пользовательский отчёт"/>
+                                    </ComboBox>
                                 </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                            </Border>
+                            
+                            <!-- Список отчётов -->
+                            <ListBox x:Name="ReportsListBox" 
+                                     Grid.Row="2" 
+                                     ItemContainerStyle="{StaticResource ReportItemStyle}"
+                                     SelectionChanged="ReportsListBox_SelectionChanged">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="White" 
+                                                BorderBrush="#E0E0E0" 
+                                                BorderThickness="1" 
+                                                CornerRadius="6" 
+                                                Margin="5" 
+                                                Padding="12">
+                                            <Border.Effect>
+                                                <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.1"/>
+                                            </Border.Effect>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                
+                                                <!-- Заголовок и статус -->
+                                                <Grid Grid.Row="0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" 
+                                                               Text="{Binding Title}" 
+                                                               FontWeight="Bold" 
+                                                               FontSize="14" 
+                                                               Foreground="#2D3748"/>
+                                                    <Border Grid.Column="1" 
+                                                            Background="#4682B4" 
+                                                            CornerRadius="12" 
+                                                            Padding="8,2">
+                                                        <TextBlock Text="{Binding Status}" 
+                                                                   FontSize="10" 
+                                                                   FontWeight="Medium" 
+                                                                   Foreground="White"/>
+                                                    </Border>
+                                                </Grid>
+                                                
+                                                <!-- Описание -->
+                                                <TextBlock Grid.Row="1" 
+                                                           Text="{Binding Description}" 
+                                                           FontSize="12" 
+                                                           Foreground="#666" 
+                                                           Margin="0,5,0,8"
+                                                           TextWrapping="Wrap"/>
+                                                
+                                                <!-- Метаданные -->
+                                                <Grid Grid.Row="2">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding ReportType.Name}" 
+                                                                   FontSize="11" 
+                                                                   Foreground="#4682B4" 
+                                                                   Margin="0,0,10,0"/>
+                                                        <TextBlock Text="{Binding CreatedDate, StringFormat='dd.MM.yyyy HH:mm'}" 
+                                                                   FontSize="11" 
+                                                                   Foreground="#999"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" 
+                                                               Text="{Binding IsAutomatic, StringFormat='{}{0:🤖;👤}'}" 
+                                                               FontSize="14" 
+                                                               ToolTip="{Binding IsAutomatic, StringFormat='{}{0:Автоматический;Пользовательский}'}"/>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- Разделитель -->
+                    <GridSplitter Grid.Column="1" Background="#E0E0E0" Width="5" HorizontalAlignment="Center"/>
+
+                    <!-- Детали отчёта -->
+                    <Border Grid.Column="2" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Детали отчёта" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button x:Name="ExportButton" 
+                                                Content="📤 Экспорт" 
+                                                Style="{StaticResource HeaderButtonStyle}"
+                                                Background="#28A745"
+                                                Click="ExportButton_Click"
+                                                Margin="0,0,5,0"
+                                                Visibility="Collapsed"/>
+                                        <Button x:Name="DeleteReportButton"
+                                                Content="🗑️ Удалить"
+                                                Background="#DC3545"
+                                                Click="DeleteReportButton_Click"
+                                                Visibility="Collapsed">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
+                                                    <Setter Property="Background" Value="#DC3545"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#C82333"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="15">
+                                <StackPanel x:Name="ReportDetailsPanel">
+                                    <TextBlock Text="Выберите отчёт для просмотра деталей" 
+                                             FontSize="14" 
+                                             Foreground="#666" 
+                                             HorizontalAlignment="Center" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,50"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
                 </Grid>
-            </Border>
-
-            <!-- Разделитель -->
-            <GridSplitter Grid.Column="1" Background="#E0E0E0" Width="5" HorizontalAlignment="Center"/>
-
-            <!-- Детали отчёта -->
-            <Border Grid.Column="2" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4">
-                <Grid>
+            </TabItem>
+            
+            <!-- Вкладка "Статистика" -->
+            <TabItem Header="📈 Статистика">
+                <Grid Margin="20">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     
-                    <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Детали отчёта" FontSize="16" FontWeight="Bold"/>
-       <Button x:Name="DeleteReportButton"
-               Content="Удалить"
-                                    Margin="20,0,0,0"
-                                    Click="DeleteReportButton_Click"
-                                    Visibility="Collapsed">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
-                                        <Setter Property="Background" Value="#DC3545"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#C82333"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </StackPanel>
+                    <!-- Заголовок статистики -->
+                    <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10" Margin="0,0,0,20">
+                        <TextBlock Text="Статистика отчётов" FontSize="18" FontWeight="Bold"/>
                     </Border>
                     
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="15">
-                        <StackPanel x:Name="ReportDetailsPanel">
-                            <TextBlock Text="Выберите отчёт для просмотра деталей" 
-                                     FontSize="14" 
-                                     Foreground="#666" 
-                                     HorizontalAlignment="Center" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,50"/>
-                        </StackPanel>
-                    </ScrollViewer>
+                    <!-- Карточки статистики -->
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Карточки с метриками -->
+                        <UniformGrid Grid.Row="0" Columns="4" Margin="0,0,0,20">
+                            <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="5" Padding="20">
+                                <Border.Effect>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <TextBlock Text="📊" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="TotalReportsText" Text="Всего отчётов: 0" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="5" Padding="20">
+                                <Border.Effect>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <TextBlock Text="✅" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="CompletedReportsText" Text="Завершённых: 0" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="5" Padding="20">
+                                <Border.Effect>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <TextBlock Text="👤" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="CustomReportsText" Text="Пользовательских: 0" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="5" Padding="20">
+                                <Border.Effect>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <TextBlock Text="📅" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="TodayReportsText" Text="Сегодня: 0" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+                        
+                        <!-- График или диаграмма -->
+                        <Border Grid.Row="1" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="20">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="📈 Распределение отчётов по типам" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                                <TextBlock x:Name="ReportsChartText" Text="График будет здесь" FontSize="14" Foreground="#666" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Grid>
-            </Border>
-        </Grid>
+            </TabItem>
+            
+            <!-- Вкладка "Настройки" -->
+            <TabItem Header="⚙️ Настройки">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="Настройки отчётов" FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
+                        
+                        <!-- Настройки автоматических отчётов -->
+                        <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="🤖 Автоматические отчёты" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <CheckBox x:Name="AutoCreateSystemReports" Content="Автоматически создавать системные отчёты" Margin="0,5"/>
+                                <CheckBox x:Name="AutoCreatePerformanceReports" Content="Автоматически создавать отчёты о производительности" Margin="0,5"/>
+                                <CheckBox x:Name="AutoCreateSecurityReports" Content="Автоматически создавать отчёты о безопасности" Margin="0,5"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <TextBlock Text="Интервал создания:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <ComboBox x:Name="ReportIntervalComboBox" Width="150">
+                                        <ComboBoxItem Content="Каждый час" IsSelected="True"/>
+                                        <ComboBoxItem Content="Каждые 6 часов"/>
+                                        <ComboBoxItem Content="Ежедневно"/>
+                                        <ComboBoxItem Content="Еженедельно"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Настройки экспорта -->
+                        <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="📤 Настройки экспорта" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <CheckBox x:Name="AutoExportReports" Content="Автоматически экспортировать отчёты" Margin="0,5"/>
+                                <CheckBox x:Name="IncludeChartsInExport" Content="Включать графики в экспорт" Margin="0,5"/>
+                                <CheckBox x:Name="CompressExports" Content="Сжимать экспортированные файлы" Margin="0,5"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <TextBlock Text="Формат по умолчанию:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <ComboBox x:Name="DefaultExportFormatComboBox" Width="150">
+                                        <ComboBoxItem Content="TXT" IsSelected="True"/>
+                                        <ComboBoxItem Content="HTML"/>
+                                        <ComboBoxItem Content="JSON"/>
+                                        <ComboBoxItem Content="CSV"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Настройки уведомлений -->
+                        <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="20">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="🔔 Уведомления" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <CheckBox x:Name="NotifyOnReportCompletion" Content="Уведомлять о завершении создания отчётов" Margin="0,5"/>
+                                <CheckBox x:Name="NotifyOnReportErrors" Content="Уведомлять об ошибках создания отчётов" Margin="0,5"/>
+                                <CheckBox x:Name="ShowReportPreview" Content="Показывать предпросмотр отчётов" Margin="0,5"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
 
         <!-- Статус бар -->
         <Border Grid.Row="2" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="20,10">

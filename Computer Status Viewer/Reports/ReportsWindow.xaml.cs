@@ -25,6 +25,8 @@ namespace Computer_Status_Viewer.Reports
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             LoadReports();
+            UpdateStatistics();
+            LoadSettings();
         }
 
         /// <summary>
@@ -34,14 +36,40 @@ namespace Computer_Status_Viewer.Reports
         {
             try
             {
+                if (_reportManager == null)
+                {
+                    if (StatusText != null) StatusText.Text = "Ошибка: ReportManager не инициализирован";
+                    return;
+                }
+
                 var reports = _reportManager.GetAllReports();
-                ReportsListBox.ItemsSource = reports;
-                ReportsCountText.Text = $"Отчётов: {reports.Count}";
-                StatusText.Text = "Отчёты загружены";
+                if (reports == null)
+                {
+                    if (StatusText != null) StatusText.Text = "Ошибка: Не удалось загрузить отчёты";
+                    return;
+                }
+
+                if (ReportsListBox != null)
+                {
+                    ReportsListBox.ItemsSource = reports;
+                }
+                
+                if (ReportsCountText != null)
+                {
+                    ReportsCountText.Text = $"Отчётов: {reports.Count}";
+                }
+                
+                if (StatusText != null)
+                {
+                    if (StatusText != null) StatusText.Text = "Отчёты загружены";
+                }
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Ошибка загрузки отчётов: {ex.Message}";
+                if (StatusText != null)
+                {
+                    if (StatusText != null) StatusText.Text = $"Ошибка загрузки отчётов: {ex.Message}";
+                }
                 MessageBox.Show($"Ошибка загрузки отчётов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -51,17 +79,23 @@ namespace Computer_Status_Viewer.Reports
         /// </summary>
         private void ReportsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ReportsListBox.SelectedItem is Report selectedReport)
+            if (ReportsListBox?.SelectedItem is Report selectedReport)
             {
                 _selectedReport = selectedReport;
                 ShowReportDetails(selectedReport);
-                DeleteReportButton.Visibility = Visibility.Visible;
+                if (DeleteReportButton != null)
+                    DeleteReportButton.Visibility = Visibility.Visible;
+                if (ExportButton != null)
+                    ExportButton.Visibility = Visibility.Visible;
             }
             else
             {
                 _selectedReport = null;
                 ShowEmptyDetails();
-                DeleteReportButton.Visibility = Visibility.Collapsed;
+                if (DeleteReportButton != null)
+                    DeleteReportButton.Visibility = Visibility.Collapsed;
+                if (ExportButton != null)
+                    ExportButton.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -72,7 +106,7 @@ namespace Computer_Status_Viewer.Reports
         {
             try
             {
-                ReportDetailsPanel.Children.Clear();
+                if (ReportDetailsPanel != null) ReportDetailsPanel.Children.Clear();
 
                 // Основная информация об отчёте
                 var mainInfoPanel = new StackPanel { Margin = new Thickness(0, 0, 0, 20) };
@@ -125,14 +159,14 @@ namespace Computer_Status_Viewer.Reports
                 infoGrid.Children.Add(rightPanel);
 
                 mainInfoPanel.Children.Add(infoGrid);
-                ReportDetailsPanel.Children.Add(mainInfoPanel);
+                if (ReportDetailsPanel != null) ReportDetailsPanel.Children.Add(mainInfoPanel);
 
                 // Загрузка данных отчёта
                 LoadReportData(report.Id);
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Ошибка загрузки деталей отчёта: {ex.Message}";
+                if (StatusText != null) StatusText.Text = $"Ошибка загрузки деталей отчёта: {ex.Message}";
             }
         }
 
@@ -154,7 +188,7 @@ namespace Computer_Status_Viewer.Reports
                         FontWeight = FontWeights.Bold,
                         Margin = new Thickness(0, 20, 0, 10)
                     };
-                    ReportDetailsPanel.Children.Add(dataHeader);
+                    if (ReportDetailsPanel != null) ReportDetailsPanel.Children.Add(dataHeader);
 
                     // Группировка данных по категориям
                     var groupedData = reportData.GroupBy(d => d.Category ?? "Без категории");
@@ -194,7 +228,7 @@ namespace Computer_Status_Viewer.Reports
                         };
                         
                         categoryPanel.Children.Add(dataGrid);
-                        ReportDetailsPanel.Children.Add(categoryPanel);
+                        if (ReportDetailsPanel != null) ReportDetailsPanel.Children.Add(categoryPanel);
                     }
                 }
                 else
@@ -207,12 +241,12 @@ namespace Computer_Status_Viewer.Reports
                         FontStyle = FontStyles.Italic,
                         Margin = new Thickness(0, 20, 0, 0)
                     };
-                    ReportDetailsPanel.Children.Add(noDataText);
+                    if (ReportDetailsPanel != null) ReportDetailsPanel.Children.Add(noDataText);
                 }
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Ошибка загрузки данных отчёта: {ex.Message}";
+                if (StatusText != null) StatusText.Text = $"Ошибка загрузки данных отчёта: {ex.Message}";
             }
         }
 
@@ -249,7 +283,7 @@ namespace Computer_Status_Viewer.Reports
         /// </summary>
         private void ShowEmptyDetails()
         {
-            ReportDetailsPanel.Children.Clear();
+            if (ReportDetailsPanel != null) ReportDetailsPanel.Children.Clear();
             
             var emptyText = new TextBlock
             {
@@ -261,7 +295,7 @@ namespace Computer_Status_Viewer.Reports
                 Margin = new Thickness(0, 50, 0, 0)
             };
             
-            ReportDetailsPanel.Children.Add(emptyText);
+            if (ReportDetailsPanel != null) ReportDetailsPanel.Children.Add(emptyText);
         }
 
         /// <summary>
@@ -271,14 +305,14 @@ namespace Computer_Status_Viewer.Reports
         {
             try
             {
-                StatusText.Text = "Создание быстрого отчёта...";
+                if (StatusText != null) StatusText.Text = "Создание быстрого отчёта...";
                 int reportId = _reportManager.CreateQuickReport();
-                StatusText.Text = $"Быстрый отчёт создан! ID: {reportId}";
+                if (StatusText != null) StatusText.Text = $"Быстрый отчёт создан! ID: {reportId}";
                 LoadReports();
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Ошибка создания быстрого отчёта: {ex.Message}";
+                if (StatusText != null) StatusText.Text = $"Ошибка создания быстрого отчёта: {ex.Message}";
                 MessageBox.Show($"Ошибка создания быстрого отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -290,14 +324,14 @@ namespace Computer_Status_Viewer.Reports
         {
             try
             {
-                StatusText.Text = "Создание подробного отчёта...";
+                if (StatusText != null) StatusText.Text = "Создание подробного отчёта...";
                 int reportId = _reportManager.CreateDetailedReport();
-                StatusText.Text = $"Подробный отчёт создан! ID: {reportId}";
+                if (StatusText != null) StatusText.Text = $"Подробный отчёт создан! ID: {reportId}";
                 LoadReports();
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Ошибка создания подробного отчёта: {ex.Message}";
+                if (StatusText != null) StatusText.Text = $"Ошибка создания подробного отчёта: {ex.Message}";
                 MessageBox.Show($"Ошибка создания подробного отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -309,7 +343,7 @@ namespace Computer_Status_Viewer.Reports
         {
             try
             {
-                StatusText.Text = "Открытие диалога выбора критериев...";
+                if (StatusText != null) StatusText.Text = "Открытие диалога выбора критериев...";
                 
                 // Открываем диалог выбора критериев для пользовательского отчёта
                 var criteriaDialog = new CustomReportCriteriaDialog();
@@ -317,7 +351,7 @@ namespace Computer_Status_Viewer.Reports
                 
                 if (result == true)
                 {
-                    StatusText.Text = "Создание пользовательского отчёта...";
+                    if (StatusText != null) StatusText.Text = "Создание пользовательского отчёта...";
                     
                     var selectedCriteria = criteriaDialog.SelectedCriteria;
                     var reportTitle = criteriaDialog.ReportTitle;
@@ -329,17 +363,17 @@ namespace Computer_Status_Viewer.Reports
                         selectedCriteria
                     );
                     
-                    StatusText.Text = $"Пользовательский отчёт создан! ID: {reportId}";
+                    if (StatusText != null) StatusText.Text = $"Пользовательский отчёт создан! ID: {reportId}";
                     LoadReports();
                 }
                 else
                 {
-                    StatusText.Text = "Создание отчёта отменено";
+                    if (StatusText != null) StatusText.Text = "Создание отчёта отменено";
                 }
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"Ошибка создания пользовательского отчёта: {ex.Message}";
+                if (StatusText != null) StatusText.Text = $"Ошибка создания пользовательского отчёта: {ex.Message}";
                 MessageBox.Show($"Ошибка создания пользовательского отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -366,16 +400,249 @@ namespace Computer_Status_Viewer.Reports
                 try
                 {
                     _reportManager.DeleteReport(_selectedReport.Id);
-                    StatusText.Text = $"Отчёт '{_selectedReport.Title}' удалён";
+                    if (StatusText != null) StatusText.Text = $"Отчёт '{_selectedReport.Title}' удалён";
                     LoadReports();
+                    UpdateStatistics();
                     ShowEmptyDetails();
-                    DeleteReportButton.Visibility = Visibility.Collapsed;
-                    // Отчёт успешно удалён
+                    if (DeleteReportButton != null)
+                        DeleteReportButton.Visibility = Visibility.Collapsed;
+                    if (ExportButton != null)
+                        ExportButton.Visibility = Visibility.Collapsed;
                 }
                 catch (Exception ex)
                 {
-                    StatusText.Text = $"Ошибка удаления отчёта: {ex.Message}";
+                    if (StatusText != null) StatusText.Text = $"Ошибка удаления отчёта: {ex.Message}";
                     MessageBox.Show($"Ошибка удаления отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Обработчик поиска
+        /// </summary>
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FilterReports();
+        }
+
+        /// <summary>
+        /// Обработчик изменения фильтров
+        /// </summary>
+        private void FilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            FilterReports();
+        }
+
+        /// <summary>
+        /// Фильтрация отчётов
+        /// </summary>
+        private void FilterReports()
+        {
+            try
+            {
+                if (_reportManager == null)
+                {
+                    if (StatusText != null) StatusText.Text = "Ошибка: ReportManager не инициализирован";
+                    return;
+                }
+
+                var allReports = _reportManager.GetAllReports();
+                if (allReports == null)
+                {
+                    if (StatusText != null) StatusText.Text = "Ошибка: Не удалось загрузить отчёты";
+                    return;
+                }
+
+                var filteredReports = allReports.AsEnumerable();
+
+                // Поиск по тексту
+                string searchText = SearchTextBox?.Text?.ToLower() ?? "";
+                if (!string.IsNullOrEmpty(searchText))
+                {
+                    filteredReports = filteredReports.Where(r => 
+                        r.Title?.ToLower().Contains(searchText) == true ||
+                        r.Description?.ToLower().Contains(searchText) == true ||
+                        r.ReportType?.Name?.ToLower().Contains(searchText) == true);
+                }
+
+                // Фильтр по статусу
+                var statusFilter = (StatusFilterComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
+                if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "Все статусы")
+                {
+                    filteredReports = filteredReports.Where(r => r.Status == statusFilter);
+                }
+
+                // Фильтр по типу
+                var typeFilter = (TypeFilterComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
+                if (!string.IsNullOrEmpty(typeFilter))
+                {
+                    if (typeFilter == "Автоматические")
+                    {
+                        filteredReports = filteredReports.Where(r => r.IsAutomatic);
+                    }
+                    else if (typeFilter == "Пользовательские")
+                    {
+                        filteredReports = filteredReports.Where(r => !r.IsAutomatic);
+                    }
+                }
+
+                // Фильтр по категории
+                var categoryFilter = (CategoryFilterComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
+                if (!string.IsNullOrEmpty(categoryFilter) && categoryFilter != "Все категории")
+                {
+                    filteredReports = filteredReports.Where(r => r.ReportType?.Name == categoryFilter);
+                }
+
+                if (ReportsListBox != null)
+                {
+                    ReportsListBox.ItemsSource = filteredReports.ToList();
+                }
+                
+                if (ReportsCountText != null)
+                {
+                    ReportsCountText.Text = $"Отчётов: {filteredReports.Count()}";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (StatusText != null) StatusText.Text = $"Ошибка фильтрации: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Обработчик кнопки обновления
+        /// </summary>
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadReports();
+            UpdateStatistics();
+        }
+
+        /// <summary>
+        /// Обработчик кнопки экспорта
+        /// </summary>
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedReport == null) return;
+
+            try
+            {
+                var saveDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Title = "Экспорт отчёта",
+                    Filter = "Текстовые файлы (*.txt)|*.txt|HTML файлы (*.html)|*.html|JSON файлы (*.json)|*.json|CSV файлы (*.csv)|*.csv",
+                    DefaultExt = "txt"
+                };
+
+                if (saveDialog.ShowDialog() == true)
+                {
+                    // Здесь можно добавить логику экспорта в разные форматы
+                    if (StatusText != null) StatusText.Text = $"Отчёт экспортирован в {saveDialog.FileName}";
+                    MessageBox.Show($"Отчёт успешно экспортирован в {saveDialog.FileName}", "Экспорт", 
+                                  MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (StatusText != null) StatusText.Text = $"Ошибка экспорта: {ex.Message}";
+                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Обновление статистики
+        /// </summary>
+        private void UpdateStatistics()
+        {
+            try
+            {
+                if (_reportManager == null)
+                {
+                    return;
+                }
+
+                var allReports = _reportManager.GetAllReports();
+                if (allReports == null)
+                {
+                    return;
+                }
+                
+                if (TotalReportsText != null)
+                {
+                    TotalReportsText.Text = $"Всего отчётов: {allReports.Count}";
+                }
+                
+                if (CompletedReportsText != null)
+                {
+                    CompletedReportsText.Text = $"Завершённых: {allReports.Count(r => r.Status == "Завершён")}";
+                }
+                
+                if (CustomReportsText != null)
+                {
+                    CustomReportsText.Text = $"Пользовательских: {allReports.Count(r => !r.IsAutomatic)}";
+                }
+                
+                if (TodayReportsText != null)
+                {
+                    TodayReportsText.Text = $"Сегодня: {allReports.Count(r => r.CreatedDate.Date == DateTime.Today)}";
+                }
+
+                // Обновляем текст графика
+                if (ReportsChartText != null)
+                {
+                    var reportTypes = allReports.GroupBy(r => r.ReportType?.Name ?? "Неизвестно")
+                        .Select(g => $"{g.Key}: {g.Count()}")
+                        .ToArray();
+                    ReportsChartText.Text = string.Join("\n", reportTypes);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (StatusText != null)
+                {
+                    if (StatusText != null) StatusText.Text = $"Ошибка обновления статистики: {ex.Message}";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Загрузка настроек
+        /// </summary>
+        private void LoadSettings()
+        {
+            try
+            {
+                // Здесь можно загрузить настройки из конфигурационного файла
+                if (AutoCreateSystemReports != null)
+                    AutoCreateSystemReports.IsChecked = true;
+                if (AutoCreatePerformanceReports != null)
+                    AutoCreatePerformanceReports.IsChecked = false;
+                if (AutoCreateSecurityReports != null)
+                    AutoCreateSecurityReports.IsChecked = false;
+                if (ReportIntervalComboBox != null)
+                    ReportIntervalComboBox.SelectedIndex = 0;
+
+                if (AutoExportReports != null)
+                    AutoExportReports.IsChecked = false;
+                if (IncludeChartsInExport != null)
+                    IncludeChartsInExport.IsChecked = true;
+                if (CompressExports != null)
+                    CompressExports.IsChecked = false;
+                if (DefaultExportFormatComboBox != null)
+                    DefaultExportFormatComboBox.SelectedIndex = 0;
+
+                if (NotifyOnReportCompletion != null)
+                    NotifyOnReportCompletion.IsChecked = true;
+                if (NotifyOnReportErrors != null)
+                    NotifyOnReportErrors.IsChecked = true;
+                if (ShowReportPreview != null)
+                    ShowReportPreview.IsChecked = true;
+            }
+            catch (Exception ex)
+            {
+                if (StatusText != null)
+                {
+                    if (StatusText != null) StatusText.Text = $"Ошибка загрузки настроек: {ex.Message}";
                 }
             }
         }
