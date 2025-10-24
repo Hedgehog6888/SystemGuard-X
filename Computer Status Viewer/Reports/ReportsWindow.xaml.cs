@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Computer_Status_Viewer.Models;
 
 namespace Computer_Status_Viewer.Reports
@@ -52,6 +53,16 @@ namespace Computer_Status_Viewer.Reports
                 if (ReportsListBox != null)
                 {
                     ReportsListBox.ItemsSource = reports;
+                    // Не очищаем выбранный элемент при загрузке отчётов
+                    if (_selectedReport != null)
+                    {
+                        // Восстанавливаем выбранный элемент если он существует
+                        var existingReport = reports.FirstOrDefault(r => r.Id == _selectedReport.Id);
+                        if (existingReport != null)
+                        {
+                            ReportsListBox.SelectedItem = existingReport;
+                        }
+                    }
                 }
                 
                 if (ReportsCountText != null)
@@ -88,15 +99,7 @@ namespace Computer_Status_Viewer.Reports
                 if (ExportButton != null)
                     ExportButton.Visibility = Visibility.Visible;
             }
-            else
-            {
-                _selectedReport = null;
-                ShowEmptyDetails();
-                if (DeleteReportButton != null)
-                    DeleteReportButton.Visibility = Visibility.Collapsed;
-                if (ExportButton != null)
-                    ExportButton.Visibility = Visibility.Collapsed;
-            }
+            // Убираем else блок - детали не закрываются автоматически
         }
 
         /// <summary>
@@ -403,11 +406,13 @@ namespace Computer_Status_Viewer.Reports
                     if (StatusText != null) StatusText.Text = $"Отчёт '{_selectedReport.Title}' удалён";
                     LoadReports();
                     UpdateStatistics();
+                    // Закрываем детали только при удалении отчёта
                     ShowEmptyDetails();
                     if (DeleteReportButton != null)
                         DeleteReportButton.Visibility = Visibility.Collapsed;
                     if (ExportButton != null)
                         ExportButton.Visibility = Visibility.Collapsed;
+                    _selectedReport = null;
                 }
                 catch (Exception ex)
                 {
@@ -417,13 +422,6 @@ namespace Computer_Status_Viewer.Reports
             }
         }
 
-        /// <summary>
-        /// Обработчик поиска
-        /// </summary>
-        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            FilterReports();
-        }
 
         /// <summary>
         /// Обработчик изменения фильтров
@@ -455,22 +453,6 @@ namespace Computer_Status_Viewer.Reports
 
                 var filteredReports = allReports.AsEnumerable();
 
-                // Поиск по тексту
-                string searchText = SearchTextBox?.Text?.ToLower() ?? "";
-                if (!string.IsNullOrEmpty(searchText))
-                {
-                    filteredReports = filteredReports.Where(r => 
-                        r.Title?.ToLower().Contains(searchText) == true ||
-                        r.Description?.ToLower().Contains(searchText) == true ||
-                        r.ReportType?.Name?.ToLower().Contains(searchText) == true);
-                }
-
-                // Фильтр по статусу
-                var statusFilter = (StatusFilterComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-                if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "Все статусы")
-                {
-                    filteredReports = filteredReports.Where(r => r.Status == statusFilter);
-                }
 
                 // Фильтр по типу
                 var typeFilter = (TypeFilterComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
@@ -509,13 +491,26 @@ namespace Computer_Status_Viewer.Reports
             }
         }
 
+
+
         /// <summary>
-        /// Обработчик кнопки обновления
+        /// Обработчик прокрутки колесиком мыши
         /// </summary>
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        private void ScrollViewer_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
-            LoadReports();
-            UpdateStatistics();
+            var scrollViewer = sender as ScrollViewer;
+            if (scrollViewer != null)
+            {
+                if (e.Delta > 0)
+                {
+                    scrollViewer.LineUp();
+                }
+                else
+                {
+                    scrollViewer.LineDown();
+                }
+                e.Handled = true;
+            }
         }
 
         /// <summary>

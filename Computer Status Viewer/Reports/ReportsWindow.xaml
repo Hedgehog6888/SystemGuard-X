@@ -4,11 +4,13 @@
         Title="SystemGuard-X" 
         Icon="/Ico/Logo.ico"
         Width="1000" Height="700"
-        MinWidth="800" MinHeight="600"
+        MinWidth="1000" MinHeight="700"
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
     
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        
         <Style x:Key="WidgetButtonStyle" TargetType="Button">
             <Setter Property="MinWidth" Value="120"/>
             <Setter Property="Height" Value="36"/>
@@ -241,77 +243,30 @@
             <!-- Вкладка "Все отчёты" -->
             <TabItem Header="📊 Все отчёты">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="5"/>
-                        <ColumnDefinition Width="3*"/>
-                    </Grid.ColumnDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" MinWidth="400"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="3*" MinWidth="400"/>
+            </Grid.ColumnDefinitions>
 
                     <!-- Список отчётов с фильтрами -->
-                    <Border Grid.Column="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4">
-                        <Grid>
-                            <Grid.RowDefinitions>
+            <Border Grid.Column="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4">
+                <Grid>
+                    <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            
-                            <!-- Заголовок с поиском -->
-                            <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Список отчётов" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                        <TextBox x:Name="SearchTextBox" 
-                                                 Width="200" 
-                                                 Height="30" 
-                                                 Padding="8,5"
-                                                 VerticalAlignment="Center"
-                                                 TextChanged="SearchTextBox_TextChanged"
-                                                 Margin="0,0,10,0">
-                                            <TextBox.Style>
-                                                <Style TargetType="TextBox">
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="TextBox">
-                                                                <Border Background="White" 
-                                                                        BorderBrush="#CBD5E0" 
-                                                                        BorderThickness="1" 
-                                                                        CornerRadius="4">
-                                                                    <ScrollViewer x:Name="PART_ContentHost" Margin="8,5"/>
-                                                                </Border>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
-                                        <Button x:Name="RefreshButton" 
-                                                Content="🔄" 
-                                                Width="30" Height="30"
-                                                Click="RefreshButton_Click"
-                                                ToolTip="Обновить список"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                            <!-- Заголовок -->
+                    <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
+                        <TextBlock Text="Список отчётов" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </Border>
                             
                             <!-- Фильтры -->
                             <Border Grid.Row="1" Background="#FAFAFA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="10,8">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Фильтры:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <ComboBox x:Name="StatusFilterComboBox" 
-                                              Width="120" 
-                                              Margin="0,0,5,0"
-                                              SelectionChanged="FilterComboBox_SelectionChanged">
-                                        <ComboBoxItem Content="Все статусы" IsSelected="True"/>
-                                        <ComboBoxItem Content="Создан"/>
-                                        <ComboBoxItem Content="В процессе"/>
-                                        <ComboBoxItem Content="Завершён"/>
-                                        <ComboBoxItem Content="Ошибка"/>
-                                    </ComboBox>
                                     <ComboBox x:Name="TypeFilterComboBox" 
                                               Width="140" 
                                               Margin="0,0,5,0"
@@ -330,15 +285,15 @@
                                         <ComboBoxItem Content="Пользовательский отчёт"/>
                                     </ComboBox>
                                 </StackPanel>
-                            </Border>
-                            
+                    </Border>
+                    
                             <!-- Список отчётов -->
-                            <ListBox x:Name="ReportsListBox" 
+                    <ListBox x:Name="ReportsListBox" 
                                      Grid.Row="2" 
-                                     ItemContainerStyle="{StaticResource ReportItemStyle}"
-                                     SelectionChanged="ReportsListBox_SelectionChanged">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
+                             ItemContainerStyle="{StaticResource ReportItemStyle}"
+                             SelectionChanged="ReportsListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
                                         <Border Background="White" 
                                                 BorderBrush="#E0E0E0" 
                                                 BorderThickness="1" 
@@ -399,32 +354,33 @@
                                                         <TextBlock Text="{Binding CreatedDate, StringFormat='dd.MM.yyyy HH:mm'}" 
                                                                    FontSize="11" 
                                                                    Foreground="#999"/>
-                                                    </StackPanel>
+                                    </StackPanel>
                                                     <TextBlock Grid.Column="1" 
                                                                Text="{Binding IsAutomatic, StringFormat='{}{0:🤖;👤}'}" 
                                                                FontSize="14" 
-                                                               ToolTip="{Binding IsAutomatic, StringFormat='{}{0:Автоматический;Пользовательский}'}"/>
+                                                               ToolTip="{Binding IsAutomatic, StringFormat='{}{0:Автоматический;Пользовательский}'}"
+                                                               Visibility="{Binding IsAutomatic, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                                 </Grid>
                                             </Grid>
                                         </Border>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Grid>
-                    </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
 
-                    <!-- Разделитель -->
-                    <GridSplitter Grid.Column="1" Background="#E0E0E0" Width="5" HorizontalAlignment="Center"/>
+            <!-- Разделитель -->
+            <GridSplitter Grid.Column="1" Background="#E0E0E0" Width="5" HorizontalAlignment="Center"/>
 
-                    <!-- Детали отчёта -->
-                    <Border Grid.Column="2" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            
-                            <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
+            <!-- Детали отчёта -->
+            <Border Grid.Column="2" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -439,39 +395,40 @@
                                                 Click="ExportButton_Click"
                                                 Margin="0,0,5,0"
                                                 Visibility="Collapsed"/>
-                                        <Button x:Name="DeleteReportButton"
+       <Button x:Name="DeleteReportButton"
                                                 Content="🗑️ Удалить"
                                                 Background="#DC3545"
-                                                Click="DeleteReportButton_Click"
-                                                Visibility="Collapsed">
-                                            <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
-                                                    <Setter Property="Background" Value="#DC3545"/>
-                                                    <Style.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#C82333"/>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
-                                    </StackPanel>
+                                    Click="DeleteReportButton_Click"
+                                    Visibility="Collapsed">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
+                                        <Setter Property="Background" Value="#DC3545"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#C82333"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
                                 </Grid>
-                            </Border>
-                            
-                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="15">
-                                <StackPanel x:Name="ReportDetailsPanel">
-                                    <TextBlock Text="Выберите отчёт для просмотра деталей" 
-                                             FontSize="14" 
-                                             Foreground="#666" 
-                                             HorizontalAlignment="Center" 
-                                             VerticalAlignment="Center"
-                                             Margin="0,50"/>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </Grid>
                     </Border>
+                    
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="15" 
+                                          PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                        <StackPanel x:Name="ReportDetailsPanel">
+                            <TextBlock Text="Выберите отчёт для просмотра деталей" 
+                                     FontSize="14" 
+                                     Foreground="#666" 
+                                     HorizontalAlignment="Center" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,50"/>
+                        </StackPanel>
+                    </ScrollViewer>
                 </Grid>
+            </Border>
+        </Grid>
             </TabItem>
             
             <!-- Вкладка "Статистика" -->
@@ -563,7 +520,7 @@
                                 <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
                             </Border.Effect>
                             <StackPanel>
-                                <TextBlock Text="🤖 Автоматические отчёты" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <TextBlock Text="Автоматические отчёты" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
                                 <CheckBox x:Name="AutoCreateSystemReports" Content="Автоматически создавать системные отчёты" Margin="0,5"/>
                                 <CheckBox x:Name="AutoCreatePerformanceReports" Content="Автоматически создавать отчёты о производительности" Margin="0,5"/>
                                 <CheckBox x:Name="AutoCreateSecurityReports" Content="Автоматически создавать отчёты о безопасности" Margin="0,5"/>
@@ -585,7 +542,7 @@
                                 <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
                             </Border.Effect>
                             <StackPanel>
-                                <TextBlock Text="📤 Настройки экспорта" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <TextBlock Text="Настройки экспорта" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
                                 <CheckBox x:Name="AutoExportReports" Content="Автоматически экспортировать отчёты" Margin="0,5"/>
                                 <CheckBox x:Name="IncludeChartsInExport" Content="Включать графики в экспорт" Margin="0,5"/>
                                 <CheckBox x:Name="CompressExports" Content="Сжимать экспортированные файлы" Margin="0,5"/>
@@ -607,7 +564,7 @@
                                 <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.1"/>
                             </Border.Effect>
                             <StackPanel>
-                                <TextBlock Text="🔔 Уведомления" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                                <TextBlock Text="Уведомления" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
                                 <CheckBox x:Name="NotifyOnReportCompletion" Content="Уведомлять о завершении создания отчётов" Margin="0,5"/>
                                 <CheckBox x:Name="NotifyOnReportErrors" Content="Уведомлять об ошибках создания отчётов" Margin="0,5"/>
                                 <CheckBox x:Name="ShowReportPreview" Content="Показывать предпросмотр отчётов" Margin="0,5"/>

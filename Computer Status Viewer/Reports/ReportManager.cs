@@ -37,7 +37,7 @@ namespace Computer_Status_Viewer.Reports
             {
                 var report = new Report
                 {
-                    Title = $"Отчёт о системе - {DateTime.Now:dd.MM.yyyy HH:mm}",
+                    Title = "Отчёт о системе",
                     Description = "Автоматический отчёт о состоянии системы",
                     CreatedDate = DateTime.Now,
                     ReportTypeId = 1, // Системная информация
@@ -73,7 +73,7 @@ namespace Computer_Status_Viewer.Reports
             {
                 var report = new Report
                 {
-                    Title = $"Отчёт о производительности - {DateTime.Now:dd.MM.yyyy HH:mm}",
+                    Title = "Отчёт о производительности",
                     Description = "Автоматический отчёт о производительности системы",
                     CreatedDate = DateTime.Now,
                     ReportTypeId = 2, // Производительность
@@ -109,7 +109,7 @@ namespace Computer_Status_Viewer.Reports
             {
                 var report = new Report
                 {
-                    Title = $"Быстрый отчёт - {DateTime.Now:dd.MM.yyyy HH:mm}",
+                    Title = "Быстрый отчёт",
                     Description = "Краткая сводка состояния системы",
                     CreatedDate = DateTime.Now,
                     ReportTypeId = 1, // Системная информация
@@ -145,7 +145,7 @@ namespace Computer_Status_Viewer.Reports
             {
                 var report = new Report
                 {
-                    Title = $"Подробный отчёт - {DateTime.Now:dd.MM.yyyy HH:mm}",
+                    Title = "Подробный отчёт",
                     Description = "Полная диагностика системы с детальной информацией",
                     CreatedDate = DateTime.Now,
                     ReportTypeId = 2, // Производительность
