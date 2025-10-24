@@ -16,11 +16,13 @@ namespace Computer_Status_Viewer.Reports
     {
         private ReportManager _reportManager;
         private Report _selectedReport;
+        private AutoReportService _autoReportService;
 
         public ReportsWindow()
         {
             InitializeComponent();
             _reportManager = new ReportManager();
+            _autoReportService = new AutoReportService();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -28,6 +30,72 @@ namespace Computer_Status_Viewer.Reports
             LoadReports();
             UpdateStatistics();
             LoadSettings();
+            SetupSettingsEventHandlers();
+        }
+
+        /// <summary>
+        /// Настройка обработчиков событий для настроек
+        /// </summary>
+        private void SetupSettingsEventHandlers()
+        {
+            // Обработчики для автоматических отчётов
+            if (AutoCreateSystemReports != null)
+                AutoCreateSystemReports.Checked += (s, e) => SaveSettings();
+            if (AutoCreateSystemReports != null)
+                AutoCreateSystemReports.Unchecked += (s, e) => SaveSettings();
+            
+            if (AutoCreatePerformanceReports != null)
+                AutoCreatePerformanceReports.Checked += (s, e) => SaveSettings();
+            if (AutoCreatePerformanceReports != null)
+                AutoCreatePerformanceReports.Unchecked += (s, e) => SaveSettings();
+            
+            if (AutoCreateSecurityReports != null)
+                AutoCreateSecurityReports.Checked += (s, e) => SaveSettings();
+            if (AutoCreateSecurityReports != null)
+                AutoCreateSecurityReports.Unchecked += (s, e) => SaveSettings();
+            
+            // Обработчик для интервала
+            if (ReportIntervalComboBox != null)
+                ReportIntervalComboBox.SelectionChanged += (s, e) => 
+                {
+                    SaveSettings();
+                    _autoReportService?.UpdateInterval();
+                };
+            
+            // Обработчики для экспорта
+            if (AutoExportReports != null)
+                AutoExportReports.Checked += (s, e) => SaveSettings();
+            if (AutoExportReports != null)
+                AutoExportReports.Unchecked += (s, e) => SaveSettings();
+            
+            if (IncludeChartsInExport != null)
+                IncludeChartsInExport.Checked += (s, e) => SaveSettings();
+            if (IncludeChartsInExport != null)
+                IncludeChartsInExport.Unchecked += (s, e) => SaveSettings();
+            
+            if (CompressExports != null)
+                CompressExports.Checked += (s, e) => SaveSettings();
+            if (CompressExports != null)
+                CompressExports.Unchecked += (s, e) => SaveSettings();
+            
+            if (DefaultExportFormatComboBox != null)
+                DefaultExportFormatComboBox.SelectionChanged += (s, e) => SaveSettings();
+            
+            // Обработчики для уведомлений
+            if (NotifyOnReportCompletion != null)
+                NotifyOnReportCompletion.Checked += (s, e) => SaveSettings();
+            if (NotifyOnReportCompletion != null)
+                NotifyOnReportCompletion.Unchecked += (s, e) => SaveSettings();
+            
+            if (NotifyOnReportErrors != null)
+                NotifyOnReportErrors.Checked += (s, e) => SaveSettings();
+            if (NotifyOnReportErrors != null)
+                NotifyOnReportErrors.Unchecked += (s, e) => SaveSettings();
+            
+            if (ShowReportPreview != null)
+                ShowReportPreview.Checked += (s, e) => SaveSettings();
+            if (ShowReportPreview != null)
+                ShowReportPreview.Unchecked += (s, e) => SaveSettings();
         }
 
         /// <summary>
@@ -90,16 +158,44 @@ namespace Computer_Status_Viewer.Reports
         /// </summary>
         private void ReportsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ReportsListBox?.SelectedItem is Report selectedReport)
+            var selectedItems = ReportsListBox?.SelectedItems;
+            if (selectedItems != null && selectedItems.Count > 0)
             {
-                _selectedReport = selectedReport;
-                ShowReportDetails(selectedReport);
+                // Если выделен только один элемент, показываем его детали
+                if (selectedItems.Count == 1 && selectedItems[0] is Report singleReport)
+                {
+                    _selectedReport = singleReport;
+                    ShowReportDetails(singleReport);
+                }
+                else
+                {
+                    // Если выделено несколько элементов, показываем общую информацию
+                    ShowMultipleSelectionDetails(selectedItems.Cast<Report>().ToList());
+                }
+                
+                // Показываем кнопку удаления для любого количества выделенных элементов
                 if (DeleteReportButton != null)
+                {
                     DeleteReportButton.Visibility = Visibility.Visible;
+                    DeleteReportButton.Content = selectedItems.Count == 1 ? 
+                        "🗑️ Удалить" : 
+                        $"🗑️ Удалить ({selectedItems.Count})";
+                }
+                
+                // Кнопка экспорта только для одного элемента
                 if (ExportButton != null)
-                    ExportButton.Visibility = Visibility.Visible;
+                    ExportButton.Visibility = selectedItems.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
             }
-            // Убираем else блок - детали не закрываются автоматически
+            else
+            {
+                // Если ничего не выделено, скрываем кнопки
+                if (DeleteReportButton != null)
+                    DeleteReportButton.Visibility = Visibility.Collapsed;
+                if (ExportButton != null)
+                    ExportButton.Visibility = Visibility.Collapsed;
+                ShowEmptyDetails();
+                _selectedReport = null;
+            }
         }
 
         /// <summary>
@@ -302,6 +398,97 @@ namespace Computer_Status_Viewer.Reports
         }
 
         /// <summary>
+        /// Показать детали множественного выделения
+        /// </summary>
+        private void ShowMultipleSelectionDetails(List<Report> selectedReports)
+        {
+            try
+            {
+                if (ReportDetailsPanel != null) ReportDetailsPanel.Children.Clear();
+
+                var mainInfoPanel = new StackPanel { Margin = new Thickness(0, 0, 0, 20) };
+                
+                var titleBlock = new TextBlock
+                {
+                    Text = $"Выделено отчётов: {selectedReports.Count}",
+                    FontSize = 18,
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 0, 0, 10)
+                };
+                mainInfoPanel.Children.Add(titleBlock);
+
+                // Статистика по выделенным отчётам
+                var automaticCount = selectedReports.Count(r => r.IsAutomatic);
+                var customCount = selectedReports.Count(r => !r.IsAutomatic);
+                var completedCount = selectedReports.Count(r => r.Status == "Завершён");
+
+                var statsText = new TextBlock
+                {
+                    Text = $"Автоматических: {automaticCount}\nПользовательских: {customCount}\nЗавершённых: {completedCount}",
+                    FontSize = 14,
+                    Foreground = System.Windows.Media.Brushes.Gray,
+                    Margin = new Thickness(0, 0, 0, 15)
+                };
+                mainInfoPanel.Children.Add(statsText);
+
+                // Список выделенных отчётов
+                var listHeader = new TextBlock
+                {
+                    Text = "Выделенные отчёты:",
+                    FontSize = 16,
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 10, 0, 5)
+                };
+                mainInfoPanel.Children.Add(listHeader);
+
+                var reportsList = new StackPanel();
+                foreach (var report in selectedReports.Take(10)) // Показываем максимум 10 отчётов
+                {
+                    var reportItem = new TextBlock
+                    {
+                        Text = $"• {report.Title} ({report.Status})",
+                        FontSize = 12,
+                        Margin = new Thickness(10, 2, 0, 2),
+                        Foreground = System.Windows.Media.Brushes.DarkSlateGray
+                    };
+                    reportsList.Children.Add(reportItem);
+                }
+
+                if (selectedReports.Count > 10)
+                {
+                    var moreText = new TextBlock
+                    {
+                        Text = $"... и ещё {selectedReports.Count - 10} отчётов",
+                        FontSize = 12,
+                        FontStyle = FontStyles.Italic,
+                        Margin = new Thickness(10, 2, 0, 2),
+                        Foreground = System.Windows.Media.Brushes.Gray
+                    };
+                    reportsList.Children.Add(moreText);
+                }
+
+                mainInfoPanel.Children.Add(reportsList);
+                if (ReportDetailsPanel != null) ReportDetailsPanel.Children.Add(mainInfoPanel);
+            }
+            catch (Exception ex)
+            {
+                if (StatusText != null) StatusText.Text = $"Ошибка отображения множественного выделения: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Обработчик нажатия клавиш в списке отчётов
+        /// </summary>
+        private void ReportsListBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Delete)
+            {
+                DeleteSelectedReports();
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
         /// Создание быстрого отчёта
         /// </summary>
         private void CreateQuickReportButton_Click(object sender, RoutedEventArgs e)
@@ -391,10 +578,26 @@ namespace Computer_Status_Viewer.Reports
         /// </summary>
         private void DeleteReportButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedReport == null) return;
+            DeleteSelectedReports();
+        }
+
+        /// <summary>
+        /// Удаление выделенных отчётов
+        /// </summary>
+        private void DeleteSelectedReports()
+        {
+            var selectedItems = ReportsListBox?.SelectedItems;
+            if (selectedItems == null || selectedItems.Count == 0) return;
+
+            var selectedReports = selectedItems.Cast<Report>().ToList();
+            var reportTitles = string.Join(", ", selectedReports.Take(3).Select(r => r.Title));
+            if (selectedReports.Count > 3)
+            {
+                reportTitles += $" и ещё {selectedReports.Count - 3} отчётов";
+            }
 
             var result = MessageBox.Show(
-                $"Вы уверены, что хотите удалить отчёт '{_selectedReport.Title}'?\n\nЭто действие нельзя отменить.",
+                $"Вы уверены, что хотите удалить {selectedReports.Count} отчёт(ов)?\n\n{reportTitles}\n\nЭто действие нельзя отменить.",
                 "Подтверждение удаления",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
@@ -403,22 +606,46 @@ namespace Computer_Status_Viewer.Reports
             {
                 try
                 {
-                    _reportManager.DeleteReport(_selectedReport.Id);
-                    if (StatusText != null) StatusText.Text = $"Отчёт '{_selectedReport.Title}' удалён";
-                    LoadReports();
-                    UpdateStatistics();
-                    // Закрываем детали только при удалении отчёта
-                    ShowEmptyDetails();
-                    if (DeleteReportButton != null)
-                        DeleteReportButton.Visibility = Visibility.Collapsed;
-                    if (ExportButton != null)
-                        ExportButton.Visibility = Visibility.Collapsed;
-                    _selectedReport = null;
+                    var deletedCount = 0;
+                    var errors = new List<string>();
+
+                    foreach (var report in selectedReports)
+                    {
+                        try
+                        {
+                            _reportManager.DeleteReport(report.Id);
+                            deletedCount++;
+                        }
+                        catch (Exception ex)
+                        {
+                            errors.Add($"Ошибка удаления '{report.Title}': {ex.Message}");
+                        }
+                    }
+
+                    if (deletedCount > 0)
+                    {
+                        if (StatusText != null) StatusText.Text = $"Удалено отчётов: {deletedCount}";
+                        LoadReports();
+                        UpdateStatistics();
+                        ShowEmptyDetails();
+                        if (DeleteReportButton != null)
+                            DeleteReportButton.Visibility = Visibility.Collapsed;
+                        if (ExportButton != null)
+                            ExportButton.Visibility = Visibility.Collapsed;
+                        _selectedReport = null;
+                    }
+
+                    if (errors.Any())
+                    {
+                        var errorMessage = string.Join("\n", errors);
+                        MessageBox.Show($"Некоторые отчёты не удалось удалить:\n{errorMessage}", 
+                                      "Ошибки при удалении", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    if (StatusText != null) StatusText.Text = $"Ошибка удаления отчёта: {ex.Message}";
-                    MessageBox.Show($"Ошибка удаления отчёта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (StatusText != null) StatusText.Text = $"Ошибка удаления отчётов: {ex.Message}";
+                    MessageBox.Show($"Ошибка удаления отчётов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -608,31 +835,64 @@ namespace Computer_Status_Viewer.Reports
         {
             try
             {
-                // Здесь можно загрузить настройки из конфигурационного файла
+                var settings = Properties.Settings.Default;
+                
+                // Загрузка настроек автоматических отчётов
                 if (AutoCreateSystemReports != null)
-                    AutoCreateSystemReports.IsChecked = true;
+                    AutoCreateSystemReports.IsChecked = settings.AutoCreateSystemReports;
                 if (AutoCreatePerformanceReports != null)
-                    AutoCreatePerformanceReports.IsChecked = false;
+                    AutoCreatePerformanceReports.IsChecked = settings.AutoCreatePerformanceReports;
                 if (AutoCreateSecurityReports != null)
-                    AutoCreateSecurityReports.IsChecked = false;
+                    AutoCreateSecurityReports.IsChecked = settings.AutoCreateSecurityReports;
+                
+                // Загрузка интервала создания отчётов
                 if (ReportIntervalComboBox != null)
-                    ReportIntervalComboBox.SelectedIndex = 0;
+                {
+                    var interval = settings.ReportInterval;
+                    for (int i = 0; i < ReportIntervalComboBox.Items.Count; i++)
+                    {
+                        var item = ReportIntervalComboBox.Items[i] as ComboBoxItem;
+                        if (item?.Content?.ToString() == interval)
+                        {
+                            ReportIntervalComboBox.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                    if (ReportIntervalComboBox.SelectedIndex == -1)
+                        ReportIntervalComboBox.SelectedIndex = 3; // По умолчанию "Ежедневно"
+                }
 
+                // Загрузка настроек экспорта
                 if (AutoExportReports != null)
-                    AutoExportReports.IsChecked = false;
+                    AutoExportReports.IsChecked = settings.AutoExportReports;
                 if (IncludeChartsInExport != null)
-                    IncludeChartsInExport.IsChecked = true;
+                    IncludeChartsInExport.IsChecked = settings.IncludeChartsInExport;
                 if (CompressExports != null)
-                    CompressExports.IsChecked = false;
+                    CompressExports.IsChecked = settings.CompressExports;
+                
                 if (DefaultExportFormatComboBox != null)
-                    DefaultExportFormatComboBox.SelectedIndex = 0;
+                {
+                    var format = settings.DefaultExportFormat;
+                    for (int i = 0; i < DefaultExportFormatComboBox.Items.Count; i++)
+                    {
+                        var item = DefaultExportFormatComboBox.Items[i] as ComboBoxItem;
+                        if (item?.Content?.ToString() == format)
+                        {
+                            DefaultExportFormatComboBox.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                    if (DefaultExportFormatComboBox.SelectedIndex == -1)
+                        DefaultExportFormatComboBox.SelectedIndex = 0; // По умолчанию "TXT"
+                }
 
+                // Загрузка настроек уведомлений
                 if (NotifyOnReportCompletion != null)
-                    NotifyOnReportCompletion.IsChecked = true;
+                    NotifyOnReportCompletion.IsChecked = settings.NotifyOnReportCompletion;
                 if (NotifyOnReportErrors != null)
-                    NotifyOnReportErrors.IsChecked = true;
+                    NotifyOnReportErrors.IsChecked = settings.NotifyOnReportErrors;
                 if (ShowReportPreview != null)
-                    ShowReportPreview.IsChecked = true;
+                    ShowReportPreview.IsChecked = settings.ShowReportPreview;
             }
             catch (Exception ex)
             {
@@ -641,6 +901,67 @@ namespace Computer_Status_Viewer.Reports
                     if (StatusText != null) StatusText.Text = $"Ошибка загрузки настроек: {ex.Message}";
                 }
             }
+        }
+
+        /// <summary>
+        /// Сохранение настроек
+        /// </summary>
+        private void SaveSettings()
+        {
+            try
+            {
+                var settings = Properties.Settings.Default;
+                
+                // Сохранение настроек автоматических отчётов
+                if (AutoCreateSystemReports != null)
+                    settings.AutoCreateSystemReports = AutoCreateSystemReports.IsChecked ?? false;
+                if (AutoCreatePerformanceReports != null)
+                    settings.AutoCreatePerformanceReports = AutoCreatePerformanceReports.IsChecked ?? false;
+                if (AutoCreateSecurityReports != null)
+                    settings.AutoCreateSecurityReports = AutoCreateSecurityReports.IsChecked ?? false;
+                
+                // Сохранение интервала создания отчётов
+                if (ReportIntervalComboBox != null && ReportIntervalComboBox.SelectedItem is ComboBoxItem selectedItem)
+                    settings.ReportInterval = selectedItem.Content?.ToString() ?? "Ежедневно";
+
+                // Сохранение настроек экспорта
+                if (AutoExportReports != null)
+                    settings.AutoExportReports = AutoExportReports.IsChecked ?? false;
+                if (IncludeChartsInExport != null)
+                    settings.IncludeChartsInExport = IncludeChartsInExport.IsChecked ?? true;
+                if (CompressExports != null)
+                    settings.CompressExports = CompressExports.IsChecked ?? false;
+                
+                if (DefaultExportFormatComboBox != null && DefaultExportFormatComboBox.SelectedItem is ComboBoxItem selectedFormat)
+                    settings.DefaultExportFormat = selectedFormat.Content?.ToString() ?? "TXT";
+
+                // Сохранение настроек уведомлений
+                if (NotifyOnReportCompletion != null)
+                    settings.NotifyOnReportCompletion = NotifyOnReportCompletion.IsChecked ?? true;
+                if (NotifyOnReportErrors != null)
+                    settings.NotifyOnReportErrors = NotifyOnReportErrors.IsChecked ?? true;
+                if (ShowReportPreview != null)
+                    settings.ShowReportPreview = ShowReportPreview.IsChecked ?? true;
+                
+                settings.Save();
+            }
+            catch (Exception ex)
+            {
+                if (StatusText != null)
+                {
+                    if (StatusText != null) StatusText.Text = $"Ошибка сохранения настроек: {ex.Message}";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Обработчик закрытия окна
+        /// </summary>
+        protected override void OnClosed(EventArgs e)
+        {
+            _autoReportService?.Stop();
+            _autoReportService?.Dispose();
+            base.OnClosed(e);
         }
 
     }

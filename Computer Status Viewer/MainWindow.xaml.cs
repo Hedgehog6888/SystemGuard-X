@@ -37,6 +37,7 @@ namespace Computer_Status_Viewer
         private Lazy<WorkTimeManager> _workTimeManager;
         private Lazy<RegionalSettingsManager> _regionalSettingsManager;
         private Lazy<ReportManager> _reportManager;
+        private AutoReportService _autoReportService;
         private WidgetManager _widgetManager;
         private DispatcherTimer timer;
         private DateTime lastUpdateTime;
@@ -70,6 +71,7 @@ namespace Computer_Status_Viewer
             _workTimeManager = new Lazy<WorkTimeManager>(() => new WorkTimeManager(Resources));
             _regionalSettingsManager = new Lazy<RegionalSettingsManager>(() => new RegionalSettingsManager(Resources));
             _reportManager = new Lazy<ReportManager>(() => new ReportManager());
+            _autoReportService = new AutoReportService();
             _subcategoryManager = new Lazy<SubcategoryManager>(() => new SubcategoryManager(MainContentArea, PerformanceTabControl, _performanceManager.Value, _summaryManager.Value, CategoryTreeView));
             _navigationManager = new Lazy<NavigationManager>(() => new NavigationManager(
                 CategoryTreeView,
@@ -114,6 +116,8 @@ namespace Computer_Status_Viewer
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // Запускаем автоматическое создание отчётов
+            _autoReportService.Start();
         }
 
         public Task InitializeAsync()
@@ -603,6 +607,10 @@ namespace Computer_Status_Viewer
 
         protected override void OnClosed(EventArgs e)
         {
+            // Останавливаем автоматическое создание отчётов
+            _autoReportService?.Stop();
+            _autoReportService?.Dispose();
+            
             if (_performanceManager.IsValueCreated) _performanceManager.Value.Dispose();
             if (_summaryManager.IsValueCreated) _summaryManager.Value.Dispose();
             if (_cpuManager.IsValueCreated) _cpuManager.Value.Dispose();
