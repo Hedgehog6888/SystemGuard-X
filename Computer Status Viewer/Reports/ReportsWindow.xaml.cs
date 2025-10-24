@@ -363,7 +363,8 @@ namespace Computer_Status_Viewer.Reports
                     int reportId = _reportManager.CreateCustomReportWithCriteria(
                         reportTitle, 
                         reportDescription, 
-                        selectedCriteria
+                        selectedCriteria,
+                        criteriaDialog.AdvancedSettings
                     );
                     
                     if (StatusText != null) StatusText.Text = $"Пользовательский отчёт создан! ID: {reportId}";
@@ -641,5 +642,6 @@ namespace Computer_Status_Viewer.Reports
                 }
             }
         }
+
     }
 }

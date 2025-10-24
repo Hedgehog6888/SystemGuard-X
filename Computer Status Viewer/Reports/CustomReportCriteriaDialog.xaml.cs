@@ -124,6 +124,17 @@ namespace Computer_Status_Viewer.Reports
             if (IncludeLogs.IsChecked == true) SelectedCriteria.Add("LOGS");
             if (IncludeRegistryInfo.IsChecked == true) SelectedCriteria.Add("REGISTRY_INFO");
             if (IncludeInstalledSoftware.IsChecked == true) SelectedCriteria.Add("INSTALLED_SOFTWARE");
+            
+            // Новые критерии
+            if (IncludeSystemServices.IsChecked == true) SelectedCriteria.Add("SYSTEM_SERVICES");
+            if (IncludeWindowsFeatures.IsChecked == true) SelectedCriteria.Add("WINDOWS_FEATURES");
+            if (IncludeDeviceDrivers.IsChecked == true) SelectedCriteria.Add("DEVICE_DRIVERS");
+            if (IncludePowerSettings.IsChecked == true) SelectedCriteria.Add("POWER_SETTINGS");
+            if (IncludeDisplaySettings.IsChecked == true) SelectedCriteria.Add("DISPLAY_SETTINGS");
+            if (IncludeAudioDevices.IsChecked == true) SelectedCriteria.Add("AUDIO_DEVICES");
+            if (IncludePrinters.IsChecked == true) SelectedCriteria.Add("PRINTERS");
+            if (IncludeWindowsUpdates.IsChecked == true) SelectedCriteria.Add("WINDOWS_UPDATES");
+            if (IncludeTaskScheduler.IsChecked == true) SelectedCriteria.Add("TASK_SCHEDULER");
         }
 
         /// <summary>
@@ -151,11 +162,28 @@ namespace Computer_Status_Viewer.Reports
             AdvancedSettings["IncludeOnlyRemovableDrives"] = IncludeOnlyRemovableDrives.IsChecked == true;
             AdvancedSettings["IncludeOnlyLowSpaceDrives"] = IncludeOnlyLowSpaceDrives.IsChecked == true;
 
+            // Новые фильтры процессов
+            AdvancedSettings["IncludeOnlySystemProcesses"] = IncludeOnlySystemProcesses.IsChecked == true;
+            AdvancedSettings["IncludeOnlyUserProcesses"] = IncludeOnlyUserProcesses.IsChecked == true;
+            AdvancedSettings["IncludeOnlyActiveProcesses"] = IncludeOnlyActiveProcesses.IsChecked == true;
+            
+            // Новые фильтры сети
+            AdvancedSettings["IncludeOnlyActiveNetworkAdapters"] = IncludeOnlyActiveNetworkAdapters.IsChecked == true;
+            AdvancedSettings["IncludeOnlyWirelessAdapters"] = IncludeOnlyWirelessAdapters.IsChecked == true;
+            AdvancedSettings["IncludeOnlyEthernetAdapters"] = IncludeOnlyEthernetAdapters.IsChecked == true;
+            
+            // Новые фильтры безопасности
+            AdvancedSettings["IncludeOnlyActiveAntivirus"] = IncludeOnlyActiveAntivirus.IsChecked == true;
+            AdvancedSettings["IncludeOnlyEnabledFirewall"] = IncludeOnlyEnabledFirewall.IsChecked == true;
+            AdvancedSettings["IncludeOnlyCriticalServices"] = IncludeOnlyCriticalServices.IsChecked == true;
+            
             // Настройки детализации
             AdvancedSettings["DetailLevel"] = (DetailLevelComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Базовая";
             AdvancedSettings["IncludeRawData"] = IncludeRawData.IsChecked == true;
             AdvancedSettings["IncludeStatistics"] = IncludeStatistics.IsChecked == true;
             AdvancedSettings["IncludeRecommendations"] = IncludeRecommendations.IsChecked == true;
+            AdvancedSettings["IncludePerformanceMetrics"] = IncludePerformanceMetrics.IsChecked == true;
+            AdvancedSettings["IncludeHealthChecks"] = IncludeHealthChecks.IsChecked == true;
 
             // Настройки уведомлений
             AdvancedSettings["NotifyOnCompletion"] = true; // По умолчанию включено
@@ -252,6 +280,17 @@ namespace Computer_Status_Viewer.Reports
             IncludeLogs.IsChecked = false;
             IncludeRegistryInfo.IsChecked = false;
             IncludeInstalledSoftware.IsChecked = false;
+            
+            // Новые критерии
+            IncludeSystemServices.IsChecked = false;
+            IncludeWindowsFeatures.IsChecked = false;
+            IncludeDeviceDrivers.IsChecked = false;
+            IncludePowerSettings.IsChecked = false;
+            IncludeDisplaySettings.IsChecked = false;
+            IncludeAudioDevices.IsChecked = false;
+            IncludePrinters.IsChecked = false;
+            IncludeWindowsUpdates.IsChecked = false;
+            IncludeTaskScheduler.IsChecked = false;
         }
 
         /// <summary>
@@ -393,6 +432,17 @@ namespace Computer_Status_Viewer.Reports
             IncludeLogs.IsChecked = true;
             IncludeRegistryInfo.IsChecked = true;
             IncludeInstalledSoftware.IsChecked = true;
+            
+            // Новые критерии
+            IncludeSystemServices.IsChecked = true;
+            IncludeWindowsFeatures.IsChecked = true;
+            IncludeDeviceDrivers.IsChecked = true;
+            IncludePowerSettings.IsChecked = true;
+            IncludeDisplaySettings.IsChecked = true;
+            IncludeAudioDevices.IsChecked = true;
+            IncludePrinters.IsChecked = true;
+            IncludeWindowsUpdates.IsChecked = true;
+            IncludeTaskScheduler.IsChecked = true;
         }
 
         /// <summary>
@@ -455,25 +505,204 @@ namespace Computer_Status_Viewer.Reports
                 CollectAdvancedSettings();
                 DetermineReportFormat();
 
-                string preview = $"Предпросмотр отчёта:\n\n";
-                preview += $"Название: {ReportTitleTextBox.Text}\n";
-                preview += $"Описание: {ReportDescriptionTextBox.Text}\n";
-                preview += $"Категория: {(CategoryComboBox.SelectedItem as ComboBoxItem)?.Content}\n";
-                preview += $"Формат: {ReportFormat.ToUpper()}\n";
-                preview += $"Выбрано критериев: {SelectedCriteria.Count}\n\n";
-                preview += "Выбранные критерии:\n";
-                foreach (var criteria in SelectedCriteria)
+                var previewWindow = new Window
                 {
-                    preview += $"• {criteria}\n";
+                    Title = "Предпросмотр отчёта",
+                    Width = 600,
+                    Height = 500,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    Owner = this
+                };
+
+                var scrollViewer = new ScrollViewer
+                {
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                    HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
+                };
+
+                var stackPanel = new StackPanel { Margin = new Thickness(20) };
+
+                // Заголовок
+                var titleBlock = new TextBlock
+                {
+                    Text = "📋 Предпросмотр отчёта",
+                    FontSize = 18,
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 0, 0, 20),
+                    Foreground = System.Windows.Media.Brushes.DarkBlue
+                };
+                stackPanel.Children.Add(titleBlock);
+
+                // Основная информация
+                var infoPanel = new StackPanel
+                {
+                    Background = System.Windows.Media.Brushes.LightBlue,
+                    Margin = new Thickness(0, 0, 0, 20)
+                };
+                
+                // Добавляем отступы через Border
+                var infoBorder = new Border
+                {
+                    Child = infoPanel,
+                    Padding = new Thickness(15)
+                };
+
+                infoPanel.Children.Add(CreatePreviewRow("Название:", ReportTitleTextBox.Text));
+                infoPanel.Children.Add(CreatePreviewRow("Описание:", ReportDescriptionTextBox.Text));
+                infoPanel.Children.Add(CreatePreviewRow("Категория:", (CategoryComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Не выбрано"));
+                infoPanel.Children.Add(CreatePreviewRow("Формат:", ReportFormat.ToUpper()));
+                infoPanel.Children.Add(CreatePreviewRow("Критериев выбрано:", SelectedCriteria.Count.ToString()));
+
+                stackPanel.Children.Add(infoBorder);
+
+                // Выбранные критерии
+                var criteriaHeader = new TextBlock
+                {
+                    Text = "✅ Выбранные критерии:",
+                    FontSize = 16,
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 0, 0, 10),
+                    Foreground = System.Windows.Media.Brushes.DarkGreen
+                };
+                stackPanel.Children.Add(criteriaHeader);
+
+                if (SelectedCriteria.Count > 0)
+                {
+                    foreach (var criteria in SelectedCriteria)
+                    {
+                        var criteriaBlock = new TextBlock
+                        {
+                            Text = $"• {GetCriteriaDisplayName(criteria)}",
+                            FontSize = 14,
+                            Margin = new Thickness(20, 2, 0, 2),
+                            Foreground = System.Windows.Media.Brushes.DarkSlateGray
+                        };
+                        stackPanel.Children.Add(criteriaBlock);
+                    }
+                }
+                else
+                {
+                    var noCriteriaBlock = new TextBlock
+                    {
+                        Text = "❌ Критерии не выбраны",
+                        FontSize = 14,
+                        Margin = new Thickness(20, 2, 0, 2),
+                        Foreground = System.Windows.Media.Brushes.Red,
+                        FontStyle = FontStyles.Italic
+                    };
+                    stackPanel.Children.Add(noCriteriaBlock);
                 }
 
-                MessageBox.Show(preview, "Предпросмотр отчёта", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Расширенные настройки
+                if (AdvancedSettings.Count > 0)
+                {
+                    var settingsHeader = new TextBlock
+                    {
+                        Text = "⚙️ Расширенные настройки:",
+                        FontSize = 16,
+                        FontWeight = FontWeights.Bold,
+                        Margin = new Thickness(0, 20, 0, 10),
+                        Foreground = System.Windows.Media.Brushes.DarkOrange
+                    };
+                    stackPanel.Children.Add(settingsHeader);
+
+                    foreach (var setting in AdvancedSettings)
+                    {
+                        var settingBlock = new TextBlock
+                        {
+                            Text = $"• {setting.Key}: {setting.Value}",
+                            FontSize = 12,
+                            Margin = new Thickness(20, 2, 0, 2),
+                            Foreground = System.Windows.Media.Brushes.DarkSlateGray
+                        };
+                        stackPanel.Children.Add(settingBlock);
+                    }
+                }
+
+                scrollViewer.Content = stackPanel;
+                previewWindow.Content = scrollViewer;
+
+                previewWindow.ShowDialog();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка при создании предпросмотра: {ex.Message}", "Ошибка", 
                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>
+        /// Создание строки для предпросмотра
+        /// </summary>
+        private StackPanel CreatePreviewRow(string label, string value)
+        {
+            var panel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 0) };
+            
+            var labelBlock = new TextBlock
+            {
+                Text = label,
+                FontWeight = FontWeights.Bold,
+                Width = 120,
+                FontSize = 12
+            };
+            
+            var valueBlock = new TextBlock
+            {
+                Text = value ?? "Не указано",
+                FontSize = 12,
+                Foreground = System.Windows.Media.Brushes.DarkSlateGray
+            };
+            
+            panel.Children.Add(labelBlock);
+            panel.Children.Add(valueBlock);
+            
+            return panel;
+        }
+
+        /// <summary>
+        /// Получение отображаемого имени критерия
+        /// </summary>
+        private string GetCriteriaDisplayName(string criteria)
+        {
+            var displayNames = new Dictionary<string, string>
+            {
+                { "OS_INFO", "Информация об операционной системе" },
+                { "COMPUTER_INFO", "Информация о компьютере" },
+                { "USER_INFO", "Информация о пользователе" },
+                { "DATETIME_INFO", "Дата и время создания" },
+                { "ENVIRONMENT_INFO", "Переменные окружения" },
+                { "CPU_INFO", "Информация о процессоре" },
+                { "MEMORY_INFO", "Информация о памяти" },
+                { "DISK_INFO", "Информация о дисках" },
+                { "GPU_INFO", "Информация о видеокарте" },
+                { "MOTHERBOARD_INFO", "Информация о материнской плате" },
+                { "BIOS_INFO", "Информация о BIOS" },
+                { "USB_INFO", "USB устройства" },
+                { "PERFORMANCE_INFO", "Производительность системы" },
+                { "NETWORK_INFO", "Сетевая информация" },
+                { "PROCESS_INFO", "Информация о процессах" },
+                { "SERVICE_INFO", "Системные службы" },
+                { "STARTUP_INFO", "Программы автозагрузки" },
+                { "SECURITY_INFO", "Настройки безопасности" },
+                { "FIREWALL_INFO", "Настройки брандмауэра" },
+                { "ANTIVIRUS_INFO", "Антивирусная защита" },
+                { "UPDATES_INFO", "Обновления системы" },
+                { "REGISTRY_INFO", "Ключевые записи реестра" },
+                { "INSTALLED_SOFTWARE", "Установленное ПО" },
+                { "SCREENSHOTS", "Скриншоты" },
+                { "LOGS", "Системные логи" },
+                { "SYSTEM_SERVICES", "Информация о службах Windows" },
+                { "WINDOWS_FEATURES", "Компоненты Windows" },
+                { "DEVICE_DRIVERS", "Драйверы устройств" },
+                { "POWER_SETTINGS", "Настройки питания" },
+                { "DISPLAY_SETTINGS", "Настройки дисплея" },
+                { "AUDIO_DEVICES", "Аудиоустройства" },
+                { "PRINTERS", "Принтеры и печать" },
+                { "WINDOWS_UPDATES", "Обновления Windows" },
+                { "TASK_SCHEDULER", "Планировщик задач" }
+            };
+
+            return displayNames.ContainsKey(criteria) ? displayNames[criteria] : criteria;
         }
 
 

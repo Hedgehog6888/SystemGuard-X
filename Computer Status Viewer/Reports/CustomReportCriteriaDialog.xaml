@@ -230,6 +230,42 @@
                                           Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
                             </StackPanel>
                         </Expander>
+                        
+                        <!-- Системные службы и компоненты -->
+                        <Expander Header="⚙️ Системные службы" IsExpanded="False" Margin="0,5,0,0">
+                            <StackPanel Margin="20,10,0,0">
+                                <CheckBox x:Name="IncludeSystemServices" Content="Информация о службах Windows" 
+                                          Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                                <CheckBox x:Name="IncludeWindowsFeatures" Content="Компоненты Windows" 
+                                          Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                                <CheckBox x:Name="IncludeDeviceDrivers" Content="Драйверы устройств" 
+                                          Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                            </StackPanel>
+                        </Expander>
+                        
+                        <!-- Устройства и настройки -->
+                        <Expander Header="🖥️ Устройства и настройки" IsExpanded="False" Margin="0,5,0,0">
+                            <StackPanel Margin="20,10,0,0">
+                                <CheckBox x:Name="IncludePowerSettings" Content="Настройки питания" 
+                                          Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                                <CheckBox x:Name="IncludeDisplaySettings" Content="Настройки дисплея" 
+                                          Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                                <CheckBox x:Name="IncludeAudioDevices" Content="Аудиоустройства" 
+                                          Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                                <CheckBox x:Name="IncludePrinters" Content="Принтеры и печать" 
+                                          Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                            </StackPanel>
+                        </Expander>
+                        
+                        <!-- Планировщик и обновления -->
+                        <Expander Header="📅 Планировщик и обновления" IsExpanded="False" Margin="0,5,0,0">
+                            <StackPanel Margin="20,10,0,0">
+                                <CheckBox x:Name="IncludeWindowsUpdates" Content="Обновления Windows" 
+                                          Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                                <CheckBox x:Name="IncludeTaskScheduler" Content="Планировщик задач" 
+                                          Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                            </StackPanel>
+                        </Expander>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -284,6 +320,42 @@
                                       Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
                         </StackPanel>
                         
+                        <!-- Фильтры процессов -->
+                        <TextBlock Text="🔄 Фильтры процессов" FontSize="13" FontWeight="Medium" 
+                                   Foreground="#4A5568" Margin="0,15,0,5"/>
+                        <StackPanel Margin="20,0,0,15">
+                            <CheckBox x:Name="IncludeOnlySystemProcesses" Content="Только системные процессы" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                            <CheckBox x:Name="IncludeOnlyUserProcesses" Content="Только пользовательские процессы" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                            <CheckBox x:Name="IncludeOnlyActiveProcesses" Content="Только активные процессы" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                        </StackPanel>
+                        
+                        <!-- Фильтры сети -->
+                        <TextBlock Text="🌐 Фильтры сети" FontSize="13" FontWeight="Medium" 
+                                   Foreground="#4A5568" Margin="0,15,0,5"/>
+                        <StackPanel Margin="20,0,0,15">
+                            <CheckBox x:Name="IncludeOnlyActiveNetworkAdapters" Content="Только активные сетевые адаптеры" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                            <CheckBox x:Name="IncludeOnlyWirelessAdapters" Content="Только беспроводные адаптеры" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                            <CheckBox x:Name="IncludeOnlyEthernetAdapters" Content="Только Ethernet адаптеры" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                        </StackPanel>
+                        
+                        <!-- Фильтры безопасности -->
+                        <TextBlock Text="🔒 Фильтры безопасности" FontSize="13" FontWeight="Medium" 
+                                   Foreground="#4A5568" Margin="0,15,0,5"/>
+                        <StackPanel Margin="20,0,0,15">
+                            <CheckBox x:Name="IncludeOnlyActiveAntivirus" Content="Только активные антивирусы" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                            <CheckBox x:Name="IncludeOnlyEnabledFirewall" Content="Только включённый брандмауэр" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                            <CheckBox x:Name="IncludeOnlyCriticalServices" Content="Только критические службы" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
+                        </StackPanel>
+                        
                         <!-- Настройки детализации -->
                         <TextBlock Text="📊 Настройки детализации" FontSize="13" FontWeight="Medium" 
                                    Foreground="#4A5568" Margin="0,15,0,5"/>
@@ -302,6 +374,10 @@
                                       Style="{StaticResource CheckBoxStyle}" IsChecked="True" Margin="0,5,0,0"/>
                             <CheckBox x:Name="IncludeRecommendations" Content="Включить рекомендации" 
                                       Style="{StaticResource CheckBoxStyle}" IsChecked="True" Margin="0,5,0,0"/>
+                            <CheckBox x:Name="IncludePerformanceMetrics" Content="Включить метрики производительности" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False" Margin="0,5,0,0"/>
+                            <CheckBox x:Name="IncludeHealthChecks" Content="Включить проверки здоровья системы" 
+                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False" Margin="0,5,0,0"/>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
