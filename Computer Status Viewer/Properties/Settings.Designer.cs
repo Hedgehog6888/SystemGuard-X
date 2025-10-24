@@ -70,5 +70,137 @@ namespace Computer_Status_Viewer.Properties {
                 this["SettingsInitialized"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AutoCreateSystemReports {
+            get {
+                return ((bool)(this["AutoCreateSystemReports"]));
+            }
+            set {
+                this["AutoCreateSystemReports"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoCreatePerformanceReports {
+            get {
+                return ((bool)(this["AutoCreatePerformanceReports"]));
+            }
+            set {
+                this["AutoCreatePerformanceReports"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoCreateSecurityReports {
+            get {
+                return ((bool)(this["AutoCreateSecurityReports"]));
+            }
+            set {
+                this["AutoCreateSecurityReports"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ежедневно")]
+        public string ReportInterval {
+            get {
+                return ((string)(this["ReportInterval"]));
+            }
+            set {
+                this["ReportInterval"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoExportReports {
+            get {
+                return ((bool)(this["AutoExportReports"]));
+            }
+            set {
+                this["AutoExportReports"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IncludeChartsInExport {
+            get {
+                return ((bool)(this["IncludeChartsInExport"]));
+            }
+            set {
+                this["IncludeChartsInExport"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CompressExports {
+            get {
+                return ((bool)(this["CompressExports"]));
+            }
+            set {
+                this["CompressExports"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("TXT")]
+        public string DefaultExportFormat {
+            get {
+                return ((string)(this["DefaultExportFormat"]));
+            }
+            set {
+                this["DefaultExportFormat"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool NotifyOnReportCompletion {
+            get {
+                return ((bool)(this["NotifyOnReportCompletion"]));
+            }
+            set {
+                this["NotifyOnReportCompletion"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool NotifyOnReportErrors {
+            get {
+                return ((bool)(this["NotifyOnReportErrors"]));
+            }
+            set {
+                this["NotifyOnReportErrors"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowReportPreview {
+            get {
+                return ((bool)(this["ShowReportPreview"]));
+            }
+            set {
+                this["ShowReportPreview"] = value;
+            }
+        }
     }
 }

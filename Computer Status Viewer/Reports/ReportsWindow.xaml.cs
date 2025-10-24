@@ -16,11 +16,13 @@ namespace Computer_Status_Viewer.Reports
     {
         private ReportManager _reportManager;
         private Report _selectedReport;
+        private AutoReportService _autoReportService;
 
         public ReportsWindow()
         {
             InitializeComponent();
             _reportManager = new ReportManager();
+            _autoReportService = new AutoReportService();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -28,6 +30,72 @@ namespace Computer_Status_Viewer.Reports
             LoadReports();
             UpdateStatistics();
             LoadSettings();
+            SetupSettingsEventHandlers();
+        }
+
+        /// <summary>
+        /// Настройка обработчиков событий для настроек
+        /// </summary>
+        private void SetupSettingsEventHandlers()
+        {
+            // Обработчики для автоматических отчётов
+            if (AutoCreateSystemReports != null)
+                AutoCreateSystemReports.Checked += (s, e) => SaveSettings();
+            if (AutoCreateSystemReports != null)
+                AutoCreateSystemReports.Unchecked += (s, e) => SaveSettings();
+            
+            if (AutoCreatePerformanceReports != null)
+                AutoCreatePerformanceReports.Checked += (s, e) => SaveSettings();
+            if (AutoCreatePerformanceReports != null)
+                AutoCreatePerformanceReports.Unchecked += (s, e) => SaveSettings();
+            
+            if (AutoCreateSecurityReports != null)
+                AutoCreateSecurityReports.Checked += (s, e) => SaveSettings();
+            if (AutoCreateSecurityReports != null)
+                AutoCreateSecurityReports.Unchecked += (s, e) => SaveSettings();
+            
+            // Обработчик для интервала
+            if (ReportIntervalComboBox != null)
+                ReportIntervalComboBox.SelectionChanged += (s, e) => 
+                {
+                    SaveSettings();
+                    _autoReportService?.UpdateInterval();
+                };
+            
+            // Обработчики для экспорта
+            if (AutoExportReports != null)
+                AutoExportReports.Checked += (s, e) => SaveSettings();
+            if (AutoExportReports != null)
+                AutoExportReports.Unchecked += (s, e) => SaveSettings();
+            
+            if (IncludeChartsInExport != null)
+                IncludeChartsInExport.Checked += (s, e) => SaveSettings();
+            if (IncludeChartsInExport != null)
+                IncludeChartsInExport.Unchecked += (s, e) => SaveSettings();
+            
+            if (CompressExports != null)
+                CompressExports.Checked += (s, e) => SaveSettings();
+            if (CompressExports != null)
+                CompressExports.Unchecked += (s, e) => SaveSettings();
+            
+            if (DefaultExportFormatComboBox != null)
+                DefaultExportFormatComboBox.SelectionChanged += (s, e) => SaveSettings();
+            
+            // Обработчики для уведомлений
+            if (NotifyOnReportCompletion != null)
+                NotifyOnReportCompletion.Checked += (s, e) => SaveSettings();
+            if (NotifyOnReportCompletion != null)
+                NotifyOnReportCompletion.Unchecked += (s, e) => SaveSettings();
+            
+            if (NotifyOnReportErrors != null)
+                NotifyOnReportErrors.Checked += (s, e) => SaveSettings();
+            if (NotifyOnReportErrors != null)
+                NotifyOnReportErrors.Unchecked += (s, e) => SaveSettings();
+            
+            if (ShowReportPreview != null)
+                ShowReportPreview.Checked += (s, e) => SaveSettings();
+            if (ShowReportPreview != null)
+                ShowReportPreview.Unchecked += (s, e) => SaveSettings();
         }
 
         /// <summary>
@@ -608,31 +676,64 @@ namespace Computer_Status_Viewer.Reports
         {
             try
             {
-                // Здесь можно загрузить настройки из конфигурационного файла
+                var settings = Properties.Settings.Default;
+                
+                // Загрузка настроек автоматических отчётов
                 if (AutoCreateSystemReports != null)
-                    AutoCreateSystemReports.IsChecked = true;
+                    AutoCreateSystemReports.IsChecked = settings.AutoCreateSystemReports;
                 if (AutoCreatePerformanceReports != null)
-                    AutoCreatePerformanceReports.IsChecked = false;
+                    AutoCreatePerformanceReports.IsChecked = settings.AutoCreatePerformanceReports;
                 if (AutoCreateSecurityReports != null)
-                    AutoCreateSecurityReports.IsChecked = false;
+                    AutoCreateSecurityReports.IsChecked = settings.AutoCreateSecurityReports;
+                
+                // Загрузка интервала создания отчётов
                 if (ReportIntervalComboBox != null)
-                    ReportIntervalComboBox.SelectedIndex = 0;
+                {
+                    var interval = settings.ReportInterval;
+                    for (int i = 0; i < ReportIntervalComboBox.Items.Count; i++)
+                    {
+                        var item = ReportIntervalComboBox.Items[i] as ComboBoxItem;
+                        if (item?.Content?.ToString() == interval)
+                        {
+                            ReportIntervalComboBox.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                    if (ReportIntervalComboBox.SelectedIndex == -1)
+                        ReportIntervalComboBox.SelectedIndex = 3; // По умолчанию "Ежедневно"
+                }
 
+                // Загрузка настроек экспорта
                 if (AutoExportReports != null)
-                    AutoExportReports.IsChecked = false;
+                    AutoExportReports.IsChecked = settings.AutoExportReports;
                 if (IncludeChartsInExport != null)
-                    IncludeChartsInExport.IsChecked = true;
+                    IncludeChartsInExport.IsChecked = settings.IncludeChartsInExport;
                 if (CompressExports != null)
-                    CompressExports.IsChecked = false;
+                    CompressExports.IsChecked = settings.CompressExports;
+                
                 if (DefaultExportFormatComboBox != null)
-                    DefaultExportFormatComboBox.SelectedIndex = 0;
+                {
+                    var format = settings.DefaultExportFormat;
+                    for (int i = 0; i < DefaultExportFormatComboBox.Items.Count; i++)
+                    {
+                        var item = DefaultExportFormatComboBox.Items[i] as ComboBoxItem;
+                        if (item?.Content?.ToString() == format)
+                        {
+                            DefaultExportFormatComboBox.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                    if (DefaultExportFormatComboBox.SelectedIndex == -1)
+                        DefaultExportFormatComboBox.SelectedIndex = 0; // По умолчанию "TXT"
+                }
 
+                // Загрузка настроек уведомлений
                 if (NotifyOnReportCompletion != null)
-                    NotifyOnReportCompletion.IsChecked = true;
+                    NotifyOnReportCompletion.IsChecked = settings.NotifyOnReportCompletion;
                 if (NotifyOnReportErrors != null)
-                    NotifyOnReportErrors.IsChecked = true;
+                    NotifyOnReportErrors.IsChecked = settings.NotifyOnReportErrors;
                 if (ShowReportPreview != null)
-                    ShowReportPreview.IsChecked = true;
+                    ShowReportPreview.IsChecked = settings.ShowReportPreview;
             }
             catch (Exception ex)
             {
@@ -641,6 +742,67 @@ namespace Computer_Status_Viewer.Reports
                     if (StatusText != null) StatusText.Text = $"Ошибка загрузки настроек: {ex.Message}";
                 }
             }
+        }
+
+        /// <summary>
+        /// Сохранение настроек
+        /// </summary>
+        private void SaveSettings()
+        {
+            try
+            {
+                var settings = Properties.Settings.Default;
+                
+                // Сохранение настроек автоматических отчётов
+                if (AutoCreateSystemReports != null)
+                    settings.AutoCreateSystemReports = AutoCreateSystemReports.IsChecked ?? false;
+                if (AutoCreatePerformanceReports != null)
+                    settings.AutoCreatePerformanceReports = AutoCreatePerformanceReports.IsChecked ?? false;
+                if (AutoCreateSecurityReports != null)
+                    settings.AutoCreateSecurityReports = AutoCreateSecurityReports.IsChecked ?? false;
+                
+                // Сохранение интервала создания отчётов
+                if (ReportIntervalComboBox != null && ReportIntervalComboBox.SelectedItem is ComboBoxItem selectedItem)
+                    settings.ReportInterval = selectedItem.Content?.ToString() ?? "Ежедневно";
+
+                // Сохранение настроек экспорта
+                if (AutoExportReports != null)
+                    settings.AutoExportReports = AutoExportReports.IsChecked ?? false;
+                if (IncludeChartsInExport != null)
+                    settings.IncludeChartsInExport = IncludeChartsInExport.IsChecked ?? true;
+                if (CompressExports != null)
+                    settings.CompressExports = CompressExports.IsChecked ?? false;
+                
+                if (DefaultExportFormatComboBox != null && DefaultExportFormatComboBox.SelectedItem is ComboBoxItem selectedFormat)
+                    settings.DefaultExportFormat = selectedFormat.Content?.ToString() ?? "TXT";
+
+                // Сохранение настроек уведомлений
+                if (NotifyOnReportCompletion != null)
+                    settings.NotifyOnReportCompletion = NotifyOnReportCompletion.IsChecked ?? true;
+                if (NotifyOnReportErrors != null)
+                    settings.NotifyOnReportErrors = NotifyOnReportErrors.IsChecked ?? true;
+                if (ShowReportPreview != null)
+                    settings.ShowReportPreview = ShowReportPreview.IsChecked ?? true;
+                
+                settings.Save();
+            }
+            catch (Exception ex)
+            {
+                if (StatusText != null)
+                {
+                    if (StatusText != null) StatusText.Text = $"Ошибка сохранения настроек: {ex.Message}";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Обработчик закрытия окна
+        /// </summary>
+        protected override void OnClosed(EventArgs e)
+        {
+            _autoReportService?.Stop();
+            _autoReportService?.Dispose();
+            base.OnClosed(e);
         }
 
     }

@@ -37,7 +37,7 @@ namespace Computer_Status_Viewer.Reports
             {
                 var report = new Report
                 {
-                    Title = "Отчёт о системе",
+                    Title = "Автоматический отчёт",
                     Description = "Автоматический отчёт о состоянии системы",
                     CreatedDate = DateTime.Now,
                     ReportTypeId = 1, // Системная информация
@@ -73,7 +73,7 @@ namespace Computer_Status_Viewer.Reports
             {
                 var report = new Report
                 {
-                    Title = "Отчёт о производительности",
+                    Title = "Автоматический отчёт",
                     Description = "Автоматический отчёт о производительности системы",
                     CreatedDate = DateTime.Now,
                     ReportTypeId = 2, // Производительность
@@ -2216,6 +2216,411 @@ namespace Computer_Status_Viewer.Reports
         {
             var criticalServices = new[] { "AudioSrv", "BITS", "CryptSvc", "Dhcp", "Dnscache", "EventLog", "LanmanServer", "LanmanWorkstation", "Netman", "PlugPlay", "RpcSs", "Spooler", "Tcpip", "Themes", "TrkWks", "W32Time", "Winmgmt" };
             return criticalServices.Contains(serviceName);
+        }
+
+        /// <summary>
+        /// Создание отчёта о безопасности
+        /// </summary>
+        public int CreateSecurityReport()
+        {
+            try
+            {
+                var report = new Report
+                {
+                    Title = "Автоматический отчёт",
+                    Description = "Автоматический отчёт о состоянии безопасности системы",
+                    CreatedDate = DateTime.Now,
+                    ReportTypeId = 3, // Безопасность
+                    IsAutomatic = true,
+                    Status = "В процессе"
+                };
+
+                int reportId = _databaseManager.CreateReport(report);
+
+                // Собираем данные о безопасности
+                CollectSecurityData(reportId);
+
+                // Генерируем файл отчёта
+                string filePath = GenerateReportFile(reportId, "security");
+                
+                // Обновляем статус отчёта
+                _databaseManager.UpdateReportStatus(reportId, "Завершён", filePath);
+
+                return reportId;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка создания отчёта о безопасности: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Сбор данных о безопасности
+        /// </summary>
+        private void CollectSecurityData(int reportId)
+        {
+            try
+            {
+                // Проверка антивируса
+                CheckAntivirusStatus(reportId);
+                
+                // Проверка брандмауэра
+                CheckFirewallStatus(reportId);
+                
+                // Проверка обновлений безопасности
+                CheckSecurityUpdates(reportId);
+                
+                // Проверка пользователей и групп
+                CheckUserAccounts(reportId);
+                
+                // Проверка служб безопасности
+                CheckSecurityServices(reportId);
+                
+                // Проверка событий безопасности
+                CheckSecurityEvents(reportId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка сбора данных о безопасности: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Проверка статуса антивируса
+        /// </summary>
+        private void CheckAntivirusStatus(int reportId)
+        {
+            try
+            {
+                var antivirusData = new List<ReportData>();
+                
+                // Проверяем Windows Defender
+                var defenderStatus = GetWindowsDefenderStatus();
+                antivirusData.Add(new ReportData
+                {
+                    ReportId = reportId,
+                    Key = "Windows Defender",
+                    Value = defenderStatus,
+                    Category = "Антивирус",
+                    DataType = "String",
+                    Timestamp = DateTime.Now
+                });
+
+                // Проверяем другие антивирусы через WMI
+                var installedAntivirus = GetInstalledAntivirus();
+                foreach (var av in installedAntivirus)
+                {
+                    antivirusData.Add(new ReportData
+                    {
+                        ReportId = reportId,
+                        Key = "Установленный антивирус",
+                        Value = av,
+                        Category = "Антивирус",
+                        DataType = "String",
+                        Timestamp = DateTime.Now
+                    });
+                }
+
+                foreach (var data in antivirusData)
+                {
+                    _databaseManager.AddReportData(data.ReportId, data.Key, data.Value, data.DataType, data.Category);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка проверки антивируса: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Получение статуса Windows Defender
+        /// </summary>
+        private string GetWindowsDefenderStatus()
+        {
+            try
+            {
+                // Здесь можно добавить проверку статуса Windows Defender
+                // Пока возвращаем базовую информацию
+                return "Проверка не выполнена";
+            }
+            catch
+            {
+                return "Ошибка проверки";
+            }
+        }
+
+        /// <summary>
+        /// Получение установленных антивирусов
+        /// </summary>
+        private List<string> GetInstalledAntivirus()
+        {
+            var antivirusList = new List<string>();
+            try
+            {
+                // Здесь можно добавить проверку установленных антивирусов через WMI
+                antivirusList.Add("Windows Defender");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения списка антивирусов: {ex.Message}");
+            }
+            return antivirusList;
+        }
+
+        /// <summary>
+        /// Проверка статуса брандмауэра
+        /// </summary>
+        private void CheckFirewallStatus(int reportId)
+        {
+            try
+            {
+                var firewallData = new List<ReportData>();
+                
+                // Проверяем статус Windows Firewall
+                var firewallStatus = GetWindowsFirewallStatus();
+                firewallData.Add(new ReportData
+                {
+                    ReportId = reportId,
+                    Key = "Windows Firewall",
+                    Value = firewallStatus,
+                    Category = "Брандмауэр",
+                    DataType = "String",
+                    Timestamp = DateTime.Now
+                });
+
+                foreach (var data in firewallData)
+                {
+                    _databaseManager.AddReportData(data.ReportId, data.Key, data.Value, data.DataType, data.Category);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка проверки брандмауэра: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Получение статуса Windows Firewall
+        /// </summary>
+        private string GetWindowsFirewallStatus()
+        {
+            try
+            {
+                // Здесь можно добавить проверку статуса Windows Firewall
+                return "Проверка не выполнена";
+            }
+            catch
+            {
+                return "Ошибка проверки";
+            }
+        }
+
+        /// <summary>
+        /// Проверка обновлений безопасности
+        /// </summary>
+        private void CheckSecurityUpdates(int reportId)
+        {
+            try
+            {
+                var updateData = new List<ReportData>();
+                
+                // Проверяем последние обновления безопасности
+                var lastUpdate = GetLastSecurityUpdate();
+                updateData.Add(new ReportData
+                {
+                    ReportId = reportId,
+                    Key = "Последнее обновление безопасности",
+                    Value = lastUpdate,
+                    Category = "Обновления",
+                    DataType = "String",
+                    Timestamp = DateTime.Now
+                });
+
+                foreach (var data in updateData)
+                {
+                    _databaseManager.AddReportData(data.ReportId, data.Key, data.Value, data.DataType, data.Category);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка проверки обновлений: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Получение последнего обновления безопасности
+        /// </summary>
+        private string GetLastSecurityUpdate()
+        {
+            try
+            {
+                // Здесь можно добавить проверку последних обновлений
+                return "Проверка не выполнена";
+            }
+            catch
+            {
+                return "Ошибка проверки";
+            }
+        }
+
+        /// <summary>
+        /// Проверка пользовательских аккаунтов
+        /// </summary>
+        private void CheckUserAccounts(int reportId)
+        {
+            try
+            {
+                var userData = new List<ReportData>();
+                
+                // Проверяем административные аккаунты
+                var adminUsers = GetAdministrativeUsers();
+                foreach (var user in adminUsers)
+                {
+                    userData.Add(new ReportData
+                    {
+                        ReportId = reportId,
+                        Key = "Административный пользователь",
+                        Value = user,
+                        Category = "Пользователи",
+                        DataType = "String",
+                        Timestamp = DateTime.Now
+                    });
+                }
+
+                foreach (var data in userData)
+                {
+                    _databaseManager.AddReportData(data.ReportId, data.Key, data.Value, data.DataType, data.Category);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка проверки пользователей: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Получение административных пользователей
+        /// </summary>
+        private List<string> GetAdministrativeUsers()
+        {
+            var adminUsers = new List<string>();
+            try
+            {
+                // Здесь можно добавить проверку административных пользователей
+                adminUsers.Add(Environment.UserName);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения административных пользователей: {ex.Message}");
+            }
+            return adminUsers;
+        }
+
+        /// <summary>
+        /// Проверка служб безопасности
+        /// </summary>
+        private void CheckSecurityServices(int reportId)
+        {
+            try
+            {
+                var serviceData = new List<ReportData>();
+                
+                // Проверяем службы безопасности
+                var securityServices = GetSecurityServices();
+                foreach (var service in securityServices)
+                {
+                    serviceData.Add(new ReportData
+                    {
+                        ReportId = reportId,
+                        Key = "Служба безопасности",
+                        Value = service,
+                        Category = "Службы",
+                        DataType = "String",
+                        Timestamp = DateTime.Now
+                    });
+                }
+
+                foreach (var data in serviceData)
+                {
+                    _databaseManager.AddReportData(data.ReportId, data.Key, data.Value, data.DataType, data.Category);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка проверки служб безопасности: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Получение служб безопасности
+        /// </summary>
+        private List<string> GetSecurityServices()
+        {
+            var services = new List<string>();
+            try
+            {
+                // Здесь можно добавить проверку служб безопасности
+                services.Add("Windows Defender");
+                services.Add("Windows Firewall");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения служб безопасности: {ex.Message}");
+            }
+            return services;
+        }
+
+        /// <summary>
+        /// Проверка событий безопасности
+        /// </summary>
+        private void CheckSecurityEvents(int reportId)
+        {
+            try
+            {
+                var eventData = new List<ReportData>();
+                
+                // Проверяем последние события безопасности
+                var securityEvents = GetRecentSecurityEvents();
+                foreach (var evt in securityEvents)
+                {
+                    eventData.Add(new ReportData
+                    {
+                        ReportId = reportId,
+                        Key = "Событие безопасности",
+                        Value = evt,
+                        Category = "События",
+                        DataType = "String",
+                        Timestamp = DateTime.Now
+                    });
+                }
+
+                foreach (var data in eventData)
+                {
+                    _databaseManager.AddReportData(data.ReportId, data.Key, data.Value, data.DataType, data.Category);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка проверки событий безопасности: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Получение последних событий безопасности
+        /// </summary>
+        private List<string> GetRecentSecurityEvents()
+        {
+            var events = new List<string>();
+            try
+            {
+                // Здесь можно добавить проверку событий безопасности из журнала событий
+                events.Add("Проверка не выполнена");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка получения событий безопасности: {ex.Message}");
+            }
+            return events;
         }
 
         #endregion

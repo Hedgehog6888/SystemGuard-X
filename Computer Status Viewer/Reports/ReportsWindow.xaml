@@ -527,9 +527,10 @@
                                 <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                                     <TextBlock Text="Интервал создания:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                     <ComboBox x:Name="ReportIntervalComboBox" Width="150">
-                                        <ComboBoxItem Content="Каждый час" IsSelected="True"/>
+                                        <ComboBoxItem Content="Каждую минуту"/>
+                                        <ComboBoxItem Content="Каждый час"/>
                                         <ComboBoxItem Content="Каждые 6 часов"/>
-                                        <ComboBoxItem Content="Ежедневно"/>
+                                        <ComboBoxItem Content="Ежедневно" IsSelected="True"/>
                                         <ComboBoxItem Content="Еженедельно"/>
                                     </ComboBox>
                                 </StackPanel>
