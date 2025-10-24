@@ -96,13 +96,6 @@
                         <ComboBoxItem Content="Сетевая информация"/>
                         <ComboBoxItem Content="Пользовательские данные"/>
                     </ComboBox>
-                    <Button x:Name="SavePresetButton" 
-                            Content="💾 Сохранить как шаблон"
-                            Style="{StaticResource ButtonStyle}"
-                            Background="#28A745"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Click="SavePresetButton_Click"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -314,52 +307,6 @@
                 </ScrollViewer>
             </TabItem>
             
-            <!-- Вкладка экспорта -->
-            <TabItem Header="📤 Экспорт и формат">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
-                    <StackPanel>
-                        <TextBlock Text="Настройка формата и экспорта отчёта" Style="{StaticResource SectionTextStyle}"/>
-                        
-                        <!-- Формат отчёта -->
-                        <TextBlock Text="📄 Формат отчёта" FontSize="13" FontWeight="Medium" 
-                                   Foreground="#4A5568" Margin="0,15,0,5"/>
-                        <StackPanel Margin="20,0,0,15">
-                            <RadioButton x:Name="FormatTxt" Content="Текстовый файл (.txt)" 
-                                         IsChecked="True" Margin="0,3"/>
-                            <RadioButton x:Name="FormatHtml" Content="HTML документ (.html)" 
-                                         Margin="0,3"/>
-                            <RadioButton x:Name="FormatJson" Content="JSON файл (.json)" 
-                                         Margin="0,3"/>
-                            <RadioButton x:Name="FormatCsv" Content="CSV таблица (.csv)" 
-                                         Margin="0,3"/>
-                        </StackPanel>
-                        
-                        <!-- Дополнительные опции экспорта -->
-                        <TextBlock Text="⚙️ Дополнительные опции" FontSize="13" FontWeight="Medium" 
-                                   Foreground="#4A5568" Margin="0,15,0,5"/>
-                        <StackPanel Margin="20,0,0,15">
-                            <CheckBox x:Name="IncludeCharts" Content="Включить графики и диаграммы" 
-                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
-                            <CheckBox x:Name="IncludeScreenshotsInReport" Content="Включить скриншоты в отчёт" 
-                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
-                            <CheckBox x:Name="CompressReport" Content="Сжать отчёт в архив" 
-                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
-                            <CheckBox x:Name="EmailReport" Content="Отправить отчёт по email" 
-                                      Style="{StaticResource CheckBoxStyle}" IsChecked="False"/>
-                        </StackPanel>
-                        
-                        <!-- Настройки уведомлений -->
-                        <TextBlock Text="🔔 Уведомления" FontSize="13" FontWeight="Medium" 
-                                   Foreground="#4A5568" Margin="0,15,0,5"/>
-                        <StackPanel Margin="20,0,0,15">
-                            <CheckBox x:Name="NotifyOnCompletion" Content="Уведомить о завершении создания отчёта" 
-                                      Style="{StaticResource CheckBoxStyle}" IsChecked="True"/>
-                            <CheckBox x:Name="AutoOpenReport" Content="Автоматически открыть созданный отчёт" 
-                                      Style="{StaticResource CheckBoxStyle}" IsChecked="True"/>
-                        </StackPanel>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
         </TabControl>
         
         <!-- Кнопки управления -->
@@ -372,7 +319,7 @@
                 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <Button x:Name="SelectAllButton" 
-                            Content="✅ Выбрать всё" 
+                            Content="Выбрать всё" 
                             Style="{StaticResource ButtonStyle}"
                             Background="#17A2B8"
                             Foreground="White"
@@ -380,7 +327,7 @@
                             Click="SelectAllButton_Click"
                             Margin="0,0,10,0"/>
                     <Button x:Name="ClearAllButton" 
-                            Content="❌ Очистить всё" 
+                            Content="Очистить всё" 
                             Style="{StaticResource ButtonStyle}"
                             Background="#6C757D"
                             Foreground="White"
@@ -390,7 +337,7 @@
                 
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <Button x:Name="PreviewButton" 
-                            Content="👁️ Предпросмотр" 
+                            Content="Предпросмотр" 
                             Style="{StaticResource ButtonStyle}"
                             Background="#FFC107"
                             Foreground="Black"
@@ -405,7 +352,7 @@
                             BorderThickness="1"
                             Click="CancelButton_Click"/>
                     <Button x:Name="CreateButton" 
-                            Content="🚀 Создать отчёт" 
+                            Content="Создать отчёт" 
                             Style="{StaticResource ButtonStyle}"
                             Background="#4682B4"
                             Foreground="White"

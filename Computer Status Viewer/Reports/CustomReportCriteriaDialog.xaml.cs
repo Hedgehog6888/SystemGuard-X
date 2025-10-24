@@ -157,27 +157,17 @@ namespace Computer_Status_Viewer.Reports
             AdvancedSettings["IncludeStatistics"] = IncludeStatistics.IsChecked == true;
             AdvancedSettings["IncludeRecommendations"] = IncludeRecommendations.IsChecked == true;
 
-            // Дополнительные опции экспорта
-            AdvancedSettings["IncludeCharts"] = IncludeCharts.IsChecked == true;
-            AdvancedSettings["IncludeScreenshotsInReport"] = IncludeScreenshotsInReport.IsChecked == true;
-            AdvancedSettings["CompressReport"] = CompressReport.IsChecked == true;
-            AdvancedSettings["EmailReport"] = EmailReport.IsChecked == true;
-
             // Настройки уведомлений
-            AdvancedSettings["NotifyOnCompletion"] = NotifyOnCompletion.IsChecked == true;
-            AdvancedSettings["AutoOpenReport"] = AutoOpenReport.IsChecked == true;
+            AdvancedSettings["NotifyOnCompletion"] = true; // По умолчанию включено
+            AdvancedSettings["AutoOpenReport"] = true; // По умолчанию включено
         }
 
         /// <summary>
-        /// Определение формата отчёта
+        /// Определение формата отчёта (по умолчанию txt)
         /// </summary>
         private void DetermineReportFormat()
         {
-            if (FormatTxt.IsChecked == true) ReportFormat = "txt";
-            else if (FormatHtml.IsChecked == true) ReportFormat = "html";
-            else if (FormatJson.IsChecked == true) ReportFormat = "json";
-            else if (FormatCsv.IsChecked == true) ReportFormat = "csv";
-            else ReportFormat = "txt";
+            ReportFormat = "txt";
         }
 
         /// <summary>
@@ -486,30 +476,6 @@ namespace Computer_Status_Viewer.Reports
             }
         }
 
-        /// <summary>
-        /// Обработчик кнопки "Сохранить как шаблон"
-        /// </summary>
-        private void SavePresetButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                string templateName = Microsoft.VisualBasic.Interaction.InputBox(
-                    "Введите название шаблона:", 
-                    "Сохранение шаблона", 
-                    "Мой шаблон");
 
-                if (!string.IsNullOrEmpty(templateName))
-                {
-                    // Здесь можно добавить логику сохранения шаблона
-                    MessageBox.Show($"Шаблон '{templateName}' сохранён!", "Успех", 
-                                  MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при сохранении шаблона: {ex.Message}", "Ошибка", 
-                              MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
     }
 }
