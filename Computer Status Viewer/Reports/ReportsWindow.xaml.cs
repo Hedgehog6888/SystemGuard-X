@@ -793,15 +793,40 @@ namespace Computer_Status_Viewer.Reports
                 var saveDialog = new Microsoft.Win32.SaveFileDialog
                 {
                     Title = "Экспорт отчёта",
-                    Filter = "Текстовые файлы (*.txt)|*.txt|HTML файлы (*.html)|*.html|JSON файлы (*.json)|*.json|CSV файлы (*.csv)|*.csv",
-                    DefaultExt = "txt"
+                    Filter = "PDF файлы (*.pdf)|*.pdf|Текстовые файлы (*.txt)|*.txt|HTML файлы (*.html)|*.html|JSON файлы (*.json)|*.json|CSV файлы (*.csv)|*.csv",
+                    DefaultExt = "pdf"
                 };
 
                 if (saveDialog.ShowDialog() == true)
                 {
-                    // Здесь можно добавить логику экспорта в разные форматы
-                    if (StatusText != null) StatusText.Text = $"Отчёт экспортирован в {saveDialog.FileName}";
-                    MessageBox.Show($"Отчёт успешно экспортирован в {saveDialog.FileName}", "Экспорт", 
+                    var filePath = saveDialog.FileName;
+                    var fileExtension = Path.GetExtension(filePath).ToLower();
+                    
+                    // Создаём экспортёр
+                    var exporter = new ReportExporter(_reportManager);
+                    
+                    // Определяем формат по расширению файла
+                    string format;
+                    switch (fileExtension)
+                    {
+                        case ".pdf":
+                            format = "pdf";
+                            break;
+                        case ".txt":
+                            format = "txt";
+                            break;
+                        default:
+                            // Для других форматов показываем сообщение о неподдерживаемом формате
+                            MessageBox.Show($"Формат {fileExtension} пока не поддерживается. Используйте PDF или TXT.", 
+                                          "Неподдерживаемый формат", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                    }
+
+                    // Экспортируем отчёт
+                    exporter.ExportReport(_selectedReport, filePath, format);
+                    
+                    if (StatusText != null) StatusText.Text = $"Отчёт экспортирован в {Path.GetFileName(filePath)}";
+                    MessageBox.Show($"Отчёт успешно экспортирован в {filePath}", "Экспорт", 
                                   MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }

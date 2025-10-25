@@ -179,6 +179,7 @@
     <Compile Include="Models\ReportType.cs" />
     <Compile Include="Reports\ReportManager.cs" />
     <Compile Include="Reports\AutoReportService.cs" />
+    <Compile Include="Reports\ReportExporter.cs" />
     <Compile Include="Reports\ReportsWindow.xaml.cs">
       <DependentUpon>ReportsWindow.xaml</DependentUpon>
     </Compile>
