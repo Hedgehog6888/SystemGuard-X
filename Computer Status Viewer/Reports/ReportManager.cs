@@ -2623,6 +2623,14 @@ namespace Computer_Status_Viewer.Reports
             return events;
         }
 
+        /// <summary>
+        /// Проверка, нужно ли создавать автоматический отчёт
+        /// </summary>
+        public bool ShouldCreateAutomaticReport(int reportTypeId, TimeSpan interval)
+        {
+            return _databaseManager.ShouldCreateAutomaticReport(reportTypeId, interval);
+        }
+
         #endregion
     }
 }

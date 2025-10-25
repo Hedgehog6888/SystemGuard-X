@@ -245,6 +245,42 @@ namespace Computer_Status_Viewer
             }
         }
 
+        /// <summary>
+        /// Тестирование новой логики автоматических отчётов
+        /// </summary>
+        private void TestAutomaticReportsLogic()
+        {
+            try
+            {
+                var reportManager = _reportManager.Value;
+                var databaseManager = new Computer_Status_Viewer.Database.DatabaseManager();
+                
+                // Тестируем проверку периодичности для системного отчёта
+                var shouldCreateSystem = reportManager.ShouldCreateAutomaticReport(1, TimeSpan.FromDays(1));
+                var shouldCreatePerformance = reportManager.ShouldCreateAutomaticReport(2, TimeSpan.FromDays(1));
+                var shouldCreateSecurity = reportManager.ShouldCreateAutomaticReport(3, TimeSpan.FromDays(1));
+                
+                System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Тест автоматических отчётов:");
+                System.Diagnostics.Debug.WriteLine($"  Системный отчёт нужен: {shouldCreateSystem}");
+                System.Diagnostics.Debug.WriteLine($"  Отчёт производительности нужен: {shouldCreatePerformance}");
+                System.Diagnostics.Debug.WriteLine($"  Отчёт безопасности нужен: {shouldCreateSecurity}");
+                
+                // Получаем информацию о последних отчётах
+                var lastSystemDate = databaseManager.GetLastAutomaticReportDate(1);
+                var lastPerformanceDate = databaseManager.GetLastAutomaticReportDate(2);
+                var lastSecurityDate = databaseManager.GetLastAutomaticReportDate(3);
+                
+                System.Diagnostics.Debug.WriteLine($"Последние отчёты:");
+                System.Diagnostics.Debug.WriteLine($"  Системный: {lastSystemDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Нет"}");
+                System.Diagnostics.Debug.WriteLine($"  Производительность: {lastPerformanceDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Нет"}");
+                System.Diagnostics.Debug.WriteLine($"  Безопасность: {lastSecurityDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Нет"}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка тестирования автоматических отчётов: {ex.Message}");
+            }
+        }
+
         public async Task LoadContentAsync()
         {
             try
@@ -264,6 +300,9 @@ namespace Computer_Status_Viewer
                 
                 // Для тестирования можно раскомментировать следующую строку:
                 // ReportsButton_Click(null, null);
+                
+                // Тестирование новой логики автоматических отчётов
+                TestAutomaticReportsLogic();
             }
             catch (Exception ex)
             {

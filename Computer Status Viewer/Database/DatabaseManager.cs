@@ -441,5 +441,82 @@ namespace Computer_Status_Viewer.Database
             }
             return types;
         }
+
+        /// <summary>
+        /// Получение последнего автоматического отчёта определённого типа
+        /// </summary>
+        public DateTime? GetLastAutomaticReportDate(int reportTypeId)
+        {
+            using (var connection = new SQLiteConnection(_connectionString))
+            {
+                connection.Open();
+                string query = @"
+                    SELECT MAX(CreatedDate) as LastDate
+                    FROM Reports 
+                    WHERE ReportTypeId = @ReportTypeId AND IsAutomatic = 1";
+
+                using (var command = new SQLiteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ReportTypeId", reportTypeId);
+                    var result = command.ExecuteScalar();
+                    
+                    if (result == null || result == DBNull.Value)
+                        return null;
+                        
+                    return Convert.ToDateTime(result);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Проверка, нужно ли создавать автоматический отчёт
+        /// </summary>
+        public bool ShouldCreateAutomaticReport(int reportTypeId, TimeSpan interval)
+        {
+            var lastReportDate = GetLastAutomaticReportDate(reportTypeId);
+            
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] DatabaseManager: Проверка отчёта типа {reportTypeId}, последний отчёт: {lastReportDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Нет"}");
+            
+            if (lastReportDate == null)
+            {
+                // Если отчётов ещё не было, проверяем, не создавали ли мы отчёт недавно
+                // Проверяем, есть ли отчёты за последние 5 минут (чтобы избежать создания при каждом запуске)
+                var recentReports = GetAutomaticReportsCount(reportTypeId, DateTime.Now.AddMinutes(-5), DateTime.Now);
+                System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] DatabaseManager: Нет последнего отчёта, недавних отчётов за 5 минут: {recentReports}");
+                return recentReports == 0;
+            }
+            
+            var timeSinceLastReport = DateTime.Now - lastReportDate.Value;
+            var shouldCreate = timeSinceLastReport >= interval;
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] DatabaseManager: Прошло времени с последнего отчёта: {timeSinceLastReport.TotalHours:F2} часов, интервал: {interval.TotalHours:F2} часов, нужно создать: {shouldCreate}");
+            return shouldCreate;
+        }
+
+        /// <summary>
+        /// Получение количества автоматических отчётов за период
+        /// </summary>
+        public int GetAutomaticReportsCount(int reportTypeId, DateTime fromDate, DateTime toDate)
+        {
+            using (var connection = new SQLiteConnection(_connectionString))
+            {
+                connection.Open();
+                string query = @"
+                    SELECT COUNT(*) 
+                    FROM Reports 
+                    WHERE ReportTypeId = @ReportTypeId 
+                    AND IsAutomatic = 1 
+                    AND CreatedDate >= @FromDate 
+                    AND CreatedDate <= @ToDate";
+
+                using (var command = new SQLiteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ReportTypeId", reportTypeId);
+                    command.Parameters.AddWithValue("@FromDate", fromDate);
+                    command.Parameters.AddWithValue("@ToDate", toDate);
+                    
+                    return Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+        }
     }
 }

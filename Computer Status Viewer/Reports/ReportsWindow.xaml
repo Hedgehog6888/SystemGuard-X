@@ -1,4 +1,4 @@
-<Window x:Class="Computer_Status_Viewer.Reports.ReportsWindow"
+    <Window x:Class="Computer_Status_Viewer.Reports.ReportsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SystemGuard-X" 
@@ -6,7 +6,8 @@
         Width="1000" Height="700"
         MinWidth="1000" MinHeight="700"
         WindowStartupLocation="CenterScreen"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        KeyDown="Window_KeyDown">
     
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -268,7 +269,20 @@
                     
                             <!-- Заголовок -->
                     <Border Grid.Row="0" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="15,10">
-                        <TextBlock Text="Список отчётов" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Список отчётов" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button x:Name="RefreshReportsButton" 
+                                    Grid.Column="1"
+                                    Content="🔄 Обновить" 
+                                    Style="{StaticResource HeaderButtonStyle}"
+                                    Background="#17A2B8"
+                                    Click="RefreshReportsButton_Click"
+                                    Padding="10,5"/>
+                        </Grid>
                     </Border>
                             
                             <!-- Фильтры -->

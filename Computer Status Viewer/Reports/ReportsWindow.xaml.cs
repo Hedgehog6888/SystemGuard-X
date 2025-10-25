@@ -34,6 +34,18 @@ namespace Computer_Status_Viewer.Reports
         }
 
         /// <summary>
+        /// Обработчик нажатия клавиш в окне
+        /// </summary>
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.F5)
+            {
+                RefreshReportsButton_Click(sender, e);
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
         /// Настройка обработчиков событий для настроек
         /// </summary>
         private void SetupSettingsEventHandlers()
@@ -486,6 +498,11 @@ namespace Computer_Status_Viewer.Reports
                 DeleteSelectedReports();
                 e.Handled = true;
             }
+            else if (e.Key == System.Windows.Input.Key.F5)
+            {
+                RefreshReportsButton_Click(sender, e);
+                e.Handled = true;
+            }
         }
 
         /// <summary>
@@ -580,6 +597,29 @@ namespace Computer_Status_Viewer.Reports
         {
             DeleteSelectedReports();
         }
+
+        /// <summary>
+        /// Обработчик кнопки "Обновить"
+        /// </summary>
+        private void RefreshReportsButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Обновляем список отчётов
+                LoadReports();
+                
+                // Обновляем статистику
+                UpdateStatistics();
+                
+                System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Список отчётов обновлён пользователем");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка обновления списка отчётов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Ошибка обновления списка отчётов: {ex.Message}");
+            }
+        }
+
 
         /// <summary>
         /// Удаление выделенных отчётов
